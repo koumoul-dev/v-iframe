@@ -1,0 +1,49 @@
+{
+  "name": "@koumoul/v-iframe",
+  "version": "0.0.0",
+  "description": "Iframes with aspect ratio, iframe resizer integration and some corner cases. ",
+  "main": "index.vue",
+  "scripts": {
+    "dev": "NODE_ENV=development webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koumoul-dev/v-iframe.git"
+  },
+  "keywords": [
+    "vuejs",
+    "iframe",
+    "responsive"
+  ],
+  "author": "Alban Mouton <alban.mouton@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/koumoul-dev/v-iframe/issues"
+  },
+  "homepage": "https://github.com/koumoul-dev/v-iframe#readme",
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "eslint": "^6.1.0",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^5.2.3",
+    "mini-css-extract-plugin": "^0.8.0",
+    "vue": "^2.6.10",
+    "vue-loader": "^15.7.1",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "dependencies": {
+    "iframe-resizer": "^4.2.2",
+    "vuetify": "^2.1.4"
+  }
+}
