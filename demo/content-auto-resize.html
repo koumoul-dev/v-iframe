@@ -8,9 +8,10 @@
     <div id="blue-block" style="width: 10px;height: 500px;background-color: blue;margin-bottom: 10px;" />
     <script type="text/javascript">
 function resize() {
-  var height = window.innerHeight;
+  console.log('resize', window.innerWidth, window.innerHeight)
   const blueBlock = document.getElementById('blue-block')
-  blueBlock.style.height = (height - 12) + 'px'
+  blueBlock.style.height = (window.innerHeight - 12) + 'px'
+  blueBlock.style.width = (window.innerWidth - 12) + 'px'
 }
 resize()
 window.addEventListener('resize', function() {

@@ -18,10 +18,6 @@
           iframe with iframe-resizer ignores aspect ratio
           <v-iframe src="./content-iframe-resizer.html" class="elevation-3" />
         </v-col>
-        <v-col cols="12" sm="6" lg="4" xl="3">
-          iframe with default aspect ratio and scrolling
-          <v-iframe src="./content-fixed-height.html" scrolling log class="elevation-3" />
-        </v-col>
       </v-row>
     </v-container>
   </v-app>

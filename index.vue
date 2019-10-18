@@ -1,8 +1,6 @@
 <template>
   <v-responsive :aspect-ratio="resized ? 10 : aspectRatio" :style="`width:${width}`" class="v-iframe">
-    <div :style="wrapperStyle">
-      <iframe :id="id" :src="src" height="100%" width="100%" :scrolling="loaded && scrolling ? 'yes' : 'no'" @load="iframeLoaded()" />
-    </div>
+    <iframe :id="id" :src="src" scrolling="no" frameborder="0" @load="iframeLoaded()" />
   </v-responsive>
 </template>
 
@@ -25,10 +23,6 @@ export default {
       default() {
         return this.$vuetify.breakpoint.smAndUp ? '1.5' : '1.0'
       }
-    },
-    scrolling: {
-      type: Boolean,
-      default: false
     },
     log: {
       type: Boolean,
@@ -59,7 +53,7 @@ export default {
       else {
         window.iFrameResize({
           log: this.log,
-          scrolling: this.scrolling,
+          scrolling: 'no',
           onResized: () => { this.resized = true }
         }, `#${this.id}`)
       }
@@ -72,5 +66,11 @@ export default {
 .v-iframe iframe {
   background-color: transparent;
   border: none;
+
+  /* cf https://stackoverflow.com/questions/16937070/iframe-size-with-css-on-ios */
+  height: 1px;
+  min-height: 100%;
+  width: 1px;
+  min-width: 100%;
 }
 </style>
