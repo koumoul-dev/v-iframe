@@ -7,7 +7,6 @@
 </template>
 
 <script>
-const iFrameResize = require('iframe-resizer/js/iframeResizer')
 
 const rand = () => Math.random().toString(36).substr(2, 5)
 
@@ -56,11 +55,14 @@ export default {
   methods: {
     iframeLoaded () {
       this.loaded = true
-      iFrameResize({
-        log: this.log,
-        scrolling: this.scrolling,
-        onResized: () => { this.resized = true }
-      }, `#${this.id}`)
+      if (!window.iFrameResize) console.log('iframe-resizer is not available.')
+      else {
+        window.iFrameResize({
+          log: this.log,
+          scrolling: this.scrolling,
+          onResized: () => { this.resized = true }
+        }, `#${this.id}`)
+      }
     }
   }
 }

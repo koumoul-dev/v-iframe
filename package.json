@@ -42,10 +42,8 @@
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.8.2"
   },
-  "dependencies": {
-    "iframe-resizer": "^4.2.2"
-  },
   "peerDependencies": {
+    "iframe-resizer": "*",
     "vuetify": "*"
   }
 }
