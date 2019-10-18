@@ -1,7 +1,7 @@
 <template>
   <v-responsive :aspect-ratio="resized ? 10 : aspectRatio" :style="`width:${width}`" class="v-iframe">
     <div :style="wrapperStyle">
-      <iframe :id="id" :src="src" height="100%" width="100%" scrolling="no" @load="iframeLoaded()" />
+      <iframe :id="id" :src="src" height="100%" width="100%" :scrolling="loaded && scrolling ? 'yes' : 'no'" @load="iframeLoaded()" />
     </div>
   </v-responsive>
 </template>
@@ -27,6 +27,14 @@ export default {
         return this.$vuetify.breakpoint.smAndUp ? '1.5' : '1.0'
       }
     },
+    scrolling: {
+      type: Boolean,
+      default: false
+    },
+    log: {
+      type: Boolean,
+      default: false
+    },
     id: {
       type: String,
       default() {
@@ -35,6 +43,7 @@ export default {
     }
   },
   data: () => ({
+    loaded: true,
     resized: false
   }),
   computed: {
@@ -46,8 +55,10 @@ export default {
   },
   methods: {
     iframeLoaded () {
+      this.loaded = true
       iFrameResize({
-        log: true,
+        log: this.log,
+        scrolling: this.scrolling,
         onResized: () => { this.resized = true }
       }, `#${this.id}`)
     }

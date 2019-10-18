@@ -4,7 +4,7 @@
   "description": "Iframes with aspect ratio, iframe resizer integration and some corner cases. ",
   "main": "index.vue",
   "scripts": {
-    "dev": "NODE_ENV=development webpack-dev-server"
+    "dev": "NODE_ENV=development webpack-dev-server --disable-host-check"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <div id="blue-block" style="width: 10px;height: 500px;background-color: blue;margin-bottom: 10px;" />
+    <script type="text/javascript">
+console.log('RESIZE');
+function resize() {
+  var height = window.innerHeight;
+  const blueBlock = document.getElementById('blue-block')
+  blueBlock.style.height = (height - 12) + 'px'
+}
+resize()
+window.addEventListener('resize', function() {
+  resize();
+}, false)
+    </script>
+  </body>
+</html>
