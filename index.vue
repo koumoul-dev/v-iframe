@@ -65,8 +65,8 @@ export default {
         }, `#${this.id}`)
       }
     },
-    sendMessage(message) {
-      this.iframeWindow.postMessage(message)
+    sendMessage(message, targetOrigin = '*') {
+      this.iframeWindow.postMessage(message, targetOrigin)
     }
   }
 }
