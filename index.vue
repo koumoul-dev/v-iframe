@@ -39,13 +39,6 @@ export default {
     loaded: true,
     resized: false
   }),
-  computed: {
-    wrapperStyle() {
-      // hack for IOS that resizes all iframes
-      // https://stackoverflow.com/questions/34320046/iframe-height-issues-on-ios-mobile-safari
-      return this.resized ? '' : 'width:1px;min-width:100%;height:1px;min-height:100%;'
-    }
-  },
   created() {
     this.messageEventListener = (e) => {
       if (e.source === this.iframeWindow) {
