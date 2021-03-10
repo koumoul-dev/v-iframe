@@ -39,7 +39,9 @@ export default {
     loaded: true,
     resized: false
   }),
-  created() {
+  mounted() {
+    this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+
     this.messageEventListener = (e) => {
       if (e.source === this.iframeWindow) {
         this.$emit('message', e.data)
@@ -53,8 +55,6 @@ export default {
   methods: {
     iframeLoaded () {
       this.loaded = true
-
-      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
 
       if (!window.iFrameResize) console.log('iframe-resizer is not available.')
       else {
