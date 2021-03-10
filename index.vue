@@ -46,9 +46,23 @@ export default {
       return this.resized ? '' : 'width:1px;min-width:100%;height:1px;min-height:100%;'
     }
   },
+  created() {
+    this.messageEventListener = (e) => {
+      if (e.source === this.iframeWindow) {
+        this.$emit('message', e.data)
+      }
+    }
+    window.addEventListener('message', this.messageEventListener)
+  },
+  destroyed() {
+    window.removeEventListener('message', this.messageEventListener)
+  },
   methods: {
     iframeLoaded () {
       this.loaded = true
+
+      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+
       if (!window.iFrameResize) console.log('iframe-resizer is not available.')
       else {
         window.iFrameResize({
@@ -57,6 +71,9 @@ export default {
           onResized: () => { this.resized = true }
         }, `#${this.id}`)
       }
+    },
+    sendMessage(message) {
+      this.iframeWindow.postMessage(message)
     }
   }
 }

@@ -18,6 +18,10 @@
           iframe with iframe-resizer ignores aspect ratio
           <v-iframe src="./content-iframe-resizer.html" class="elevation-3" />
         </v-col>
+        <v-col cols="12" sm="6" lg="4" xl="3">
+          iframe with message exchange
+          <v-iframe ref="iframeMessage" src="./content-message.html" class="elevation-3" @message="onMessage" />
+        </v-col>
       </v-row>
     </v-container>
   </v-app>
@@ -27,7 +31,13 @@
 import VIframe from '../index.vue'
 
 export default {
-  components: { VIframe }
+  components: { VIframe },
+  methods: {
+    onMessage(message) {
+      console.log('received message from iframe', message)
+      this.$refs.iframeMessage.sendMessage({ text: 'Response from parent' })
+    }
+  }
 }
 </script>
 
