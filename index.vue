@@ -1,6 +1,6 @@
 <template>
   <v-responsive :aspect-ratio="resized ? 10 : aspectRatio" :style="`width:${width}`" class="v-iframe">
-    <iframe :id="id" :src="src" scrolling="no" frameborder="0" @load="iframeLoaded()" />
+    <iframe :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
   </v-responsive>
 </template>
 
@@ -32,6 +32,12 @@ export default {
       type: String,
       default() {
         return `viframe-${rand()}-${rand()}`
+      }
+    },
+    iframeAttrs: {
+      type: Object,
+      default() {
+        return {}
       }
     }
   },
