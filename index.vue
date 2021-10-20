@@ -1,6 +1,6 @@
 <template>
-  <v-responsive :aspect-ratio="resized ? 10 : aspectRatio" :style="`width:${width}`" class="v-iframe">
-    <iframe :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
+  <v-responsive :aspect-ratio="resized ? 10 : actualAspectRatio" :style="`width:${width}`" class="v-iframe">
+    <iframe v-if="actualWidth" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
   </v-responsive>
 </template>
 
@@ -19,10 +19,7 @@ export default {
       default: '100%'
     },
     aspectRatio: {
-      type: String,
-      default() {
-        return this.$vuetify.breakpoint.smAndUp ? '1.5' : '1.0'
-      }
+      type: Number
     },
     log: {
       type: Boolean,
@@ -43,20 +40,38 @@ export default {
   },
   data: () => ({
     loaded: true,
-    resized: false
+    resized: false,
+    actualWidth: null
   }),
-  mounted() {
-    this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
-
-    this.messageEventListener = (e) => {
-      if (e.source === this.iframeWindow) {
-        this.$emit('message', e.data)
-      }
+  computed: {
+    actualAspectRatio() {
+      if (this.aspectRatio) return this.aspectRatio
+      if (!this.actualWidth) return
+      if (this.actualWidth < 600) return 1 // same as xs but on the current element not full page
+      if (this.actualWidth < 960) return 4 / 3 // sm
+      if (this.actualWidth < 1264) return 16 / 9 // md
+      return 21 / 9
     }
-    window.addEventListener('message', this.messageEventListener)
+  },
+  mounted() {
+    this.resizeListener = (e) => {
+      this.actualWidth = this.$el.getBoundingClientRect().width
+    }
+    this.resizeListener()
+    window.addEventListener('resize', this.resizeListener)
+    this.$nextTick(() => {
+      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+      this.messageEventListener = (e) => {
+        if (e.source === this.iframeWindow) {
+          this.$emit('message', e.data)
+        }
+      }
+      window.addEventListener('message', this.messageEventListener)
+    })
   },
   destroyed() {
     window.removeEventListener('message', this.messageEventListener)
+    window.removeEventListener('message', this.resizeListener)
   },
   methods: {
     iframeLoaded () {
