@@ -1,6 +1,6 @@
 <template>
   <v-responsive :aspect-ratio="resized ? 10 : actualAspectRatio" :style="`width:${width}`" class="v-iframe">
-    <iframe v-if="actualWidth" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
+    <iframe v-if="actualWidth !== null" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
   </v-responsive>
 </template>
 
@@ -19,7 +19,8 @@ export default {
       default: '100%'
     },
     aspectRatio: {
-      type: Number
+      type: Number,
+      default: null
     },
     log: {
       type: Boolean,
@@ -54,19 +55,21 @@ export default {
     }
   },
   mounted() {
-    this.resizeListener = (e) => {
-      this.actualWidth = this.$el.getBoundingClientRect().width
-    }
-    this.resizeListener()
-    window.addEventListener('resize', this.resizeListener)
     this.$nextTick(() => {
-      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
-      this.messageEventListener = (e) => {
-        if (e.source === this.iframeWindow) {
-          this.$emit('message', e.data)
-        }
+      this.resizeListener = (e) => {
+        this.actualWidth = this.$el.getBoundingClientRect().width
       }
-      window.addEventListener('message', this.messageEventListener)
+      this.resizeListener()
+      window.addEventListener('resize', this.resizeListener)
+      this.$nextTick(() => {
+        this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+        this.messageEventListener = (e) => {
+          if (e.source === this.iframeWindow) {
+            this.$emit('message', e.data)
+          }
+        }
+        window.addEventListener('message', this.messageEventListener)
+      })
     })
   },
   destroyed() {
