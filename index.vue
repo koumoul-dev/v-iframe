@@ -47,34 +47,44 @@ export default {
   computed: {
     actualAspectRatio() {
       if (this.aspectRatio) return this.aspectRatio
-      if (!this.actualWidth) return
+      if (!this.actualWidth) return 16 / 9
       if (this.actualWidth < 500) return 1
       if (this.actualWidth < 800) return 4 / 3
       if (this.actualWidth < 1200) return 16 / 9
       return 21 / 9
     }
   },
-  mounted() {
-    this.$nextTick(() => {
-      this.resizeListener = (e) => {
-        this.actualWidth = this.$el.getBoundingClientRect().width
+  async mounted() {
+    // first nextTick to wait for context to be rendered and hopefully have definitive width (dialogs, etc)
+    await this.$nextTick()
+    this.resizeListener = async (e) => {
+      const newWidth = this.$el.getBoundingClientRect().width
+      if (this.actualWidth !== null && this.actualWidth !== newWidth) {
+        // second nextTick to force a redraw of the iframe
+        // it might create a flicking effect, but the iframe content might not manage resizing correctly
+        console.log('v-iframe - context is resized', this.actualWidth)
+        this.iframeWindow = null
+        this.actualWidth = null
+        await this.$nextTick()
       }
-      this.resizeListener()
-      window.addEventListener('resize', this.resizeListener)
-      this.$nextTick(() => {
-        this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
-        this.messageEventListener = (e) => {
-          if (e.source === this.iframeWindow) {
-            this.$emit('message', e.data)
-          }
-        }
-        window.addEventListener('message', this.messageEventListener)
-      })
-    })
+      this.actualWidth = newWidth
+      // third nextTick to wait for iframe to be rendered now that actualWidth was defined
+      await this.$nextTick()
+      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+    }
+    this.resizeListener()
+    window.addEventListener('resize', this.resizeListener)
+
+    this.messageEventListener = (e) => {
+      if (e.source === this.iframeWindow) {
+        this.$emit('message', e.data)
+      }
+    }
+    window.addEventListener('message', this.messageEventListener)
   },
   destroyed() {
     window.removeEventListener('message', this.messageEventListener)
-    window.removeEventListener('message', this.resizeListener)
+    window.removeEventListener('resize', this.resizeListener)
   },
   methods: {
     iframeLoaded () {
