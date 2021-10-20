@@ -48,9 +48,9 @@ export default {
     actualAspectRatio() {
       if (this.aspectRatio) return this.aspectRatio
       if (!this.actualWidth) return
-      if (this.actualWidth < 600) return 1 // same as xs but on the current element not full page
-      if (this.actualWidth < 960) return 4 / 3 // sm
-      if (this.actualWidth < 1264) return 16 / 9 // md
+      if (this.actualWidth < 500) return 1
+      if (this.actualWidth < 800) return 4 / 3
+      if (this.actualWidth < 1200) return 16 / 9
       return 21 / 9
     }
   },
