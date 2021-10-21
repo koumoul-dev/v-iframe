@@ -1,7 +1,9 @@
 <template>
-  <v-responsive :aspect-ratio="resized ? 10 : actualAspectRatio" :style="`width:${width}`" class="v-iframe">
-    <iframe v-if="actualWidth !== null" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
-  </v-responsive>
+  <div class="v-iframe" :style="`width:${width}`">
+    <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio">
+      <iframe v-if="actualWidth" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
+    </v-responsive>
+  </div>
 </template>
 
 <script>
@@ -46,35 +48,29 @@ export default {
   }),
   computed: {
     actualAspectRatio() {
+      if (this.resized) return 10
       if (this.aspectRatio) return this.aspectRatio
-      if (!this.actualWidth) return 16 / 9
+      if (!this.actualWidth) return null
       if (this.actualWidth < 500) return 1
       if (this.actualWidth < 800) return 4 / 3
       if (this.actualWidth < 1200) return 16 / 9
       return 21 / 9
     }
   },
-  async mounted() {
-    // first nextTick to wait for context to be rendered and hopefully have definitive width (dialogs, etc)
-    await this.$nextTick()
-    this.resizeListener = async (e) => {
-      const newWidth = this.$el.getBoundingClientRect().width
-      if (this.actualWidth !== null && this.actualWidth !== newWidth) {
-        // second nextTick to force a redraw of the iframe
-        // it might create a flicking effect, but the iframe content might not manage resizing correctly
-        console.log('v-iframe - context is resized', this.actualWidth)
-        this.iframeWindow = null
-        this.actualWidth = null
-        await this.$nextTick()
-      }
-      this.actualWidth = newWidth
-      // third nextTick to wait for iframe to be rendered now that actualWidth was defined
-      await this.$nextTick()
-      this.iframeWindow = this.$el.getElementsByTagName('iframe')[0].contentWindow
+  mounted() {
+    // a nextTick to wait for context to be rendered and hopefully have definitive width (dialogs, etc)
+    this.$nextTick(() => this.resize())
+
+    this.resizeListener = (e) => {
+      // simple debounce on window resize
+      if (this.resizeTimeout) clearTimeout(this.resizeTimeout)
+      this.resizeTimeout = setTimeout(() => {
+        this.resize()
+      }, 300)
     }
-    this.resizeListener()
     window.addEventListener('resize', this.resizeListener)
 
+    // transmit message from iframe as a message event
     this.messageEventListener = (e) => {
       if (e.source === this.iframeWindow) {
         this.$emit('message', e.data)
@@ -92,6 +88,7 @@ export default {
 
       if (!window.iFrameResize) console.log('iframe-resizer is not available.')
       else {
+        // always try to apply ifrmae resizer, it it is not loaded inside the iframe it will do nothing
         window.iFrameResize({
           log: this.log,
           scrolling: 'no',
@@ -101,6 +98,30 @@ export default {
     },
     sendMessage(message, targetOrigin = '*') {
       this.iframeWindow.postMessage(message, targetOrigin)
+    },
+    resize() {
+      const newWidth = this.$el.getBoundingClientRect().width
+      if (this.actualWidth === newWidth) return
+      if (this.actualWidth !== null) {
+        // another nextTick to force a redraw of the iframe
+        // it might create a flicking effect, but the iframe content might not manage resizing correctly
+        if (this.log) console.log('v-iframe - context is resized', this.actualWidth, newWidth)
+        this.iframeWindow = null
+        this.actualWidth = null
+        this.$nextTick(() => this.applyNewWidth(newWidth))
+      } else {
+        this.applyNewWidth(newWidth)
+      }
+    },
+    applyNewWidth(newWidth) {
+      this.actualWidth = newWidth
+      // another nextTick to wait for iframe to be rendered now that actualWidth was defined
+      this.$nextTick(() => {
+        const iframeElement = this.$el.getElementsByTagName('iframe')[0]
+        this.iframeWindow = iframeElement.contentWindow
+        const rect = iframeElement.getBoundingClientRect()
+        if (this.log) console.log('v-iframe - check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+      })
     }
   }
 }
