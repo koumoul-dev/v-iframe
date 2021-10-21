@@ -1,6 +1,6 @@
 <template>
   <div class="v-iframe" :style="`width:${width}`">
-    <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio">
+    <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio" style="max-height:100%;">
       <iframe v-if="actualWidth" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
     </v-responsive>
   </div>
