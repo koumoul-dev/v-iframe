@@ -19,8 +19,12 @@
           <v-iframe src="./content-iframe-resizer.html" class="elevation-3" />
         </v-col>
         <v-col cols="12" sm="6" lg="4" xl="3">
-          iframe with specific height ignores aspect ratio
+          iframe with explicit small height ignores aspect ratio
           <v-iframe src="./content-auto-resize.html" class="elevation-3" style="height: 100px" />
+        </v-col>
+        <v-col cols="12" sm="6" lg="4" xl="3">
+          iframe with explicit large height ignores aspect ratio
+          <v-iframe src="./content-auto-resize.html" class="elevation-3" style="height: 700px" />
         </v-col>
         <v-col cols="12" sm="6" lg="4" xl="3">
           iframe with message exchange
