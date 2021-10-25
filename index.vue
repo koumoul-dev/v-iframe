@@ -20,7 +20,15 @@ export default {
       type: String,
       default: '100%'
     },
+    // if not given a default value will be processed
+    // can be ignored if the iframe is managed by iframe-resizer or if a height is specified as style of the parent element
     aspectRatio: {
+      type: Number,
+      default: null
+    },
+    // delay to apply before calculating aspect ratio and rendering iframe
+    // useful for example is there is a transition and you want to prevent some flickering effect
+    delay: {
       type: Number,
       default: null
     },
@@ -58,8 +66,13 @@ export default {
     }
   },
   mounted() {
-    // a nextTick to wait for context to be rendered and hopefully have definitive width (dialogs, etc)
-    this.$nextTick(() => this.resize())
+    // wait for context to be rendered and hopefully have definitive width (dialogs, etc)
+    if (this.delay !== null) {
+      setTimeout(() => this.resize(), this.delay)
+    } else {
+      // at least a nextTick
+      this.$nextTick(() => this.resize())
+    }
 
     this.resizeListener = (e) => {
       // simple debounce on window resize
