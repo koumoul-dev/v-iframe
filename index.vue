@@ -1,7 +1,7 @@
 <template>
   <div class="v-iframe" :style="`width:${width}`">
     <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio" style="height:100%;">
-      <iframe v-if="actualWidth" :id="id" :src="src" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
+      <iframe v-if="actualWidth" :id="id" :src="originalSrc" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
     </v-responsive>
   </div>
 </template>
@@ -52,7 +52,8 @@ export default {
   data: () => ({
     loaded: true,
     resized: false,
-    actualWidth: null
+    actualWidth: null,
+    originalSrc: null
   }),
   computed: {
     actualAspectRatio() {
@@ -63,6 +64,25 @@ export default {
       if (this.actualWidth < 800) return 4 / 3
       if (this.actualWidth < 1200) return 16 / 9
       return 21 / 9
+    }
+  },
+  watch: {
+    src: {
+      handler() {
+        if (!this.src || !this.originalSrc || !this.iframeWindow) {
+          this.originalSrc = this.src
+        } else {
+          // replacing location instead of changing src prevents interacting with the browser history
+          if (this.log) console.log('v-iframe - replace location', this.src)
+          try {
+            this.iframeWindow.location.replace(this.src)
+          } catch (err) {
+            if (this.log) console.log('v-iframe - failure to replace location', err)
+            this.originalSrc = this.src
+          }
+        }
+      },
+      immediate: true
     }
   },
   mounted() {
