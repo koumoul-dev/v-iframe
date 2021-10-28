@@ -146,11 +146,15 @@ export default {
         this.applyNewWidth(newWidth)
       }
     },
-    applyNewWidth(newWidth) {
+    applyNewWidth(newWidth, recurse = true) {
       this.actualWidth = newWidth
       // another nextTick to wait for iframe to be rendered now that actualWidth was defined
       this.$nextTick(() => {
         const iframeElement = this.$el.getElementsByTagName('iframe')[0]
+        if (!iframeElement) {
+          if (recurse) return this.applyNewWidth(newWidth, false)
+          else return console.error('v-irame iframe element was not created after setting its width')
+        }
         this.iframeWindow = iframeElement.contentWindow
         const rect = iframeElement.getBoundingClientRect()
         if (this.log) console.log('v-iframe - check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
