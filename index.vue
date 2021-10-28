@@ -8,6 +8,10 @@
 
 <script>
 
+const debug = require('debug')
+const debugVIframe = debug('v-iframe')
+debugVIframe.log = console.log.bind(console)
+const debugIframeResizer = debug('iframe-resizer')
 const rand = () => Math.random().toString(36).substr(2, 5)
 
 export default {
@@ -31,10 +35,6 @@ export default {
     delay: {
       type: Number,
       default: null
-    },
-    log: {
-      type: Boolean,
-      default: false
     },
     id: {
       type: String,
@@ -73,11 +73,11 @@ export default {
           this.originalSrc = this.src
         } else {
           // replacing location instead of changing src prevents interacting with the browser history
-          if (this.log) console.log('v-iframe - replace location', this.src)
+          this.debug('replace location after change', this.src)
           try {
             this.iframeWindow.location.replace(this.src)
           } catch (err) {
-            if (this.log) console.log('v-iframe - failure to replace location', err)
+            this.debug('failure to replace location', err)
             this.originalSrc = this.src
           }
         }
@@ -86,6 +86,8 @@ export default {
     }
   },
   mounted() {
+    this.debug = debugVIframe.extend(this.id)
+    this.debug('mount', this.src)
     // wait for context to be rendered and hopefully have definitive width (dialogs, etc)
     if (this.delay !== null) {
       setTimeout(() => this.resize(), this.delay)
@@ -123,7 +125,7 @@ export default {
       else {
         // always try to apply ifrmae resizer, it it is not loaded inside the iframe it will do nothing
         window.iFrameResize({
-          log: this.log,
+          log: debugIframeResizer.enabled,
           scrolling: 'no',
           onResized: () => { this.resized = true }
         }, `#${this.id}`)
@@ -138,7 +140,7 @@ export default {
       if (this.actualWidth !== null) {
         // another nextTick to force a redraw of the iframe
         // it might create a flicking effect, but the iframe content might not manage resizing correctly
-        if (this.log) console.log('v-iframe - context is resized', this.actualWidth, newWidth)
+        this.debug('context is resized', this.actualWidth, newWidth)
         this.iframeWindow = null
         this.actualWidth = null
         this.$nextTick(() => this.applyNewWidth(newWidth))
@@ -153,11 +155,11 @@ export default {
         const iframeElement = this.$el.getElementsByTagName('iframe')[0]
         if (!iframeElement) {
           if (recurse) return this.applyNewWidth(newWidth, false)
-          else return console.error('v-irame iframe element was not created after setting its width')
+          else return console.error('v-iframe - iframe element was not created after setting its width')
         }
         this.iframeWindow = iframeElement.contentWindow
         const rect = iframeElement.getBoundingClientRect()
-        if (this.log) console.log('v-iframe - check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+        this.debug('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
       })
     }
   }

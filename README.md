@@ -6,5 +6,6 @@ Vuejs iframes with aspect ratio, iframe resizer integration and some corner case
 
 ```
 npm i
+npm i --no-save vuetify iframe-resizer
 npm run dev
 ```

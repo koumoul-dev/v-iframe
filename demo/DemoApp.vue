@@ -8,7 +8,7 @@
         </v-col>
         <v-col cols="12" sm="6" lg="4" xl="3">
           iframe with custom aspect ratio
-          <v-iframe src="./content-auto-resize.html" aspect-ratio="2" class="elevation-3" />
+          <v-iframe src="./content-auto-resize.html" :aspect-ratio="2" class="elevation-3" />
         </v-col>
         <v-col cols="12" sm="6" lg="4" xl="3">
           iframe with custom width
