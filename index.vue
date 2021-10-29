@@ -143,7 +143,9 @@ export default {
     resize() {
       const newWidth = this.$el.getBoundingClientRect().width
       this.debug(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
+
       if (this.actualWidth === newWidth) return
+      if (!newWidth) return
       if (this.actualWidth !== null && this.redrawOnResize) {
         // another nextTick to force a redraw of the iframe
         // it might create a flicking effect, but the iframe content might not manage resizing correctly
