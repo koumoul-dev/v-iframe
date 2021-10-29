@@ -47,6 +47,10 @@ export default {
       default() {
         return {}
       }
+    },
+    redrawOnResize: {
+      type: Boolean,
+      default: false
     }
   },
   data: () => ({
@@ -95,6 +99,8 @@ export default {
       // at least a nextTick
       this.$nextTick(() => this.resize())
     }
+    // also wait a little extra to check in case of animation, etc
+    setTimeout(() => this.resize(), 300)
 
     this.resizeListener = (e) => {
       // simple debounce on window resize
@@ -136,11 +142,12 @@ export default {
     },
     resize() {
       const newWidth = this.$el.getBoundingClientRect().width
+      this.debug(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
       if (this.actualWidth === newWidth) return
-      if (this.actualWidth !== null) {
+      if (this.actualWidth !== null && this.redrawOnResize) {
         // another nextTick to force a redraw of the iframe
         // it might create a flicking effect, but the iframe content might not manage resizing correctly
-        this.debug('context is resized', this.actualWidth, newWidth)
+        this.debug('force iframe redraw after resize', this.actualWidth, newWidth)
         this.iframeWindow = null
         this.actualWidth = null
         this.$nextTick(() => this.applyNewWidth(newWidth))
@@ -150,6 +157,7 @@ export default {
     },
     applyNewWidth(newWidth, recurse = true) {
       this.actualWidth = newWidth
+      this.debug(`applied new width, width=${this.actualWidth}, aspectRatio=${this.actualAspectRatio}`)
       // another nextTick to wait for iframe to be rendered now that actualWidth was defined
       this.$nextTick(() => {
         const iframeElement = this.$el.getElementsByTagName('iframe')[0]
@@ -158,8 +166,10 @@ export default {
           else return console.error('v-iframe - iframe element was not created after setting its width')
         }
         this.iframeWindow = iframeElement.contentWindow
-        const rect = iframeElement.getBoundingClientRect()
-        this.debug('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+        setTimeout(() => {
+          const rect = iframeElement.getBoundingClientRect()
+          this.debug('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+        }, 300)
       })
     }
   }
