@@ -1,7 +1,7 @@
 <template>
   <div class="v-iframe" :style="`width:${width}`">
     <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio" style="height:100%;">
-      <iframe v-if="actualWidth" :id="id" :src="originalSrc" scrolling="no" frameborder="0" v-bind="iframeAttrs" @load="iframeLoaded()" />
+      <iframe v-if="actualWidth" v-bind="fullIframeAttrs" @load="iframeLoaded()" />
     </v-responsive>
   </div>
 </template>
@@ -51,6 +51,10 @@ export default {
     redrawOnResize: {
       type: Boolean,
       default: false
+    },
+    lazy: {
+      type: Boolean,
+      default: true
     }
   },
   data: () => ({
@@ -68,6 +72,16 @@ export default {
       if (this.actualWidth < 800) return 4 / 3
       if (this.actualWidth < 1200) return 16 / 9
       return 21 / 9
+    },
+    fullIframeAttrs() {
+      return {
+        id: this.id,
+        src: this.originalSrc,
+        scrolling: 'no',
+        frameborder: 0,
+        loading: this.lazy ? 'lazy' : 'eager',
+        ...this.iframeAttrs
+      }
     }
   },
   watch: {
