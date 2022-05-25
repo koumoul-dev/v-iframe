@@ -55,6 +55,12 @@ export default {
     lazy: {
       type: Boolean,
       default: true
+    },
+    goToOptions: {
+      type: Object,
+      default() {
+        return { offset: 8 }
+      }
     }
   },
   data: () => ({
@@ -127,7 +133,16 @@ export default {
 
     // transmit message from iframe as a message event
     this.messageEventListener = (e) => {
-      if (e.source === this.iframeWindow) {
+      if (e.source !== this.iframeWindow) return
+      if (typeof e.data === 'string' && (e.data.startsWith('[iFrameResizer]') || e.data.startsWith('[iFrameSizer'))) {
+        console.log('nothing todo')
+      } else if (typeof e.data === 'object' && e.data.viframe) {
+        // messages to be interpreted by viframe itself contain object with viframe=true
+        debugVIframe('perform action', e.data)
+        if (e.data.scroll === 'top') this.$vuetify.goTo('#' + this.id, this.goToOptions)
+        if (typeof e.data.scroll === 'number') this.$vuetify.goTo('#' + this.id, { ...this.goToOptions, offset: -e.data.scroll })
+      } else {
+        debugVIframe('transmit message', e.data)
         this.$emit('message', e.data)
       }
     }

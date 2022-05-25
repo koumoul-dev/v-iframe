@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <div>top</div>
+    <div style="position: absolute;top:100px;">100px</div>
+    <div style="position: absolute;bottom:8px;">
+      <button onclick="parent.postMessage({viframe: true, scroll: 'top'})">Send scroll to top</button>
+      <button onclick="parent.postMessage({viframe: true, scroll: 100})">Send scroll to 100px</button>
+    </div>
+  </body>
+</html>

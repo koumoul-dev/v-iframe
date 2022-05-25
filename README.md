@@ -1,6 +1,6 @@
 # v-iframe
 
-Vuejs iframes with aspect ratio, iframe resizer integration and some corner cases.
+Vuejs/Vuetify iframes with aspect ratio, iframe resizer integration, notifications and some corner cases.
 
 ## Development
 
