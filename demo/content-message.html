@@ -6,9 +6,12 @@
   </head>
   <body>
     <button onclick="parent.postMessage({text: 'Message from iframe'})">Send message</button>
+    <button onclick="parent.postMessage({viframe: true, uiNotification: 'Hello !'})">Send UI notification</button>
+    <button onclick="parent.postMessage({viframe: true, uiNotification: {type: 'warning', msg: 'Hello !'}})">Send warning UI notification</button>
     <div id="message-box"></div>
     <script type="text/javascript">
       window.addEventListener('message', function(e) {
+        console.log('received message from parent', e.data)
         if (e.data && e.data.text) {
           document.getElementById('message-box').innerHTML = e.data.text
         }

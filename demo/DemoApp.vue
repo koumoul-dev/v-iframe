@@ -31,8 +31,8 @@
           <v-iframe ref="iframeMessage" src="./content-message.html" class="elevation-3" @message="onMessage" />
         </v-col>
         <v-col cols="12" sm="6" lg="4" xl="3">
-          iframe with scrollToTop instruction
-          <v-iframe ref="iframeMessage" src="./content-scroll-top.html" class="elevation-3" style="height: 1500px" />
+          iframe with scrollTo instructions
+          <v-iframe ref="iframeScroll" src="./content-scroll.html" class="elevation-3" style="height: 1500px" />
         </v-col>
       </v-row>
     </v-container>

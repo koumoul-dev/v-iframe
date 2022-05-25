@@ -3,6 +3,30 @@
     <v-responsive v-if="actualAspectRatio" :aspect-ratio="actualAspectRatio" style="height:100%;">
       <iframe v-if="actualWidth" v-bind="fullIframeAttrs" @load="iframeLoaded()" />
     </v-responsive>
+
+    <v-snackbar
+      v-if="notification"
+      ref="notificationSnackbar"
+      v-model="showNotification"
+      class="ui-notification"
+      v-bind="fullSnackbarProps"
+    >
+      <p>{{ notification.msg }}</p>
+      <p
+        v-if="notification.errorMsg"
+        class="ml-3"
+        v-html="notification.errorMsg"
+      />
+
+      <template #action="{ }">
+        <v-btn
+          icon
+          @click.native="showNotification = false"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -61,13 +85,21 @@ export default {
       default() {
         return { offset: 8 }
       }
+    },
+    snackbarProps: {
+      type: Object,
+      default() {
+        return { tile: true, right: true, bottom: true, timeout: 30000 }
+      }
     }
   },
   data: () => ({
     loaded: true,
     resized: false,
     actualWidth: null,
-    originalSrc: null
+    originalSrc: null,
+    notification: null,
+    showNotification: false
   }),
   computed: {
     actualAspectRatio() {
@@ -88,6 +120,14 @@ export default {
         loading: this.lazy ? 'lazy' : 'eager',
         ...this.iframeAttrs
       }
+    },
+    fullSnackbarProps() {
+      const props = { ...this.snackbarProps }
+      if (!this.notification) return props
+      if (this.notification.type === 'error') props.timeout = 0
+      if (this.notification.type === 'default') props.text = true
+      props.color = this.notification.type
+      return props
     }
   },
   watch: {
@@ -136,11 +176,18 @@ export default {
       if (e.source !== this.iframeWindow) return
       if (typeof e.data === 'string' && (e.data.startsWith('[iFrameResizer]') || e.data.startsWith('[iFrameSizer'))) {
         console.log('nothing todo')
-      } else if (typeof e.data === 'object' && e.data.viframe) {
+      } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe)) {
         // messages to be interpreted by viframe itself contain object with viframe=true
         debugVIframe('perform action', e.data)
         if (e.data.scroll === 'top') this.$vuetify.goTo('#' + this.id, this.goToOptions)
         if (typeof e.data.scroll === 'number') this.$vuetify.goTo('#' + this.id, { ...this.goToOptions, offset: -e.data.scroll })
+        if (e.data.uiNotification) {
+          if (this.showNotification) {
+            this.showNotification = false
+            setTimeout(() => this.setNotification(e.data.uiNotification), 300)
+          }
+          this.setNotification(e.data.uiNotification)
+        }
       } else {
         debugVIframe('transmit message', e.data)
         this.$emit('message', e.data)
@@ -202,6 +249,16 @@ export default {
           this.debug('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
         }, 300)
       })
+    },
+    setNotification(notif) {
+      if (typeof notif === 'string') notif = { msg: notif }
+      if (notif.error) {
+        notif.type = 'error'
+        notif.errorMsg = (notif.error.response && (notif.error.response.data || notif.error.response.status)) || notif.error.message || notif.error
+      }
+      notif.type = notif.type || 'default'
+      this.notification = notif
+      this.showNotification = true
     }
   }
 }
@@ -218,4 +275,16 @@ export default {
   width: 1px;
   min-width: 100%;
 }
+
+.v-iframe .ui-notification.v-snack .v-snack__wrapper {
+  min-width: 256px;
+}
+.v-iframe .ui-notification.v-snack .v-snack__content {
+  height: auto;
+}
+.v-iframe .ui-notification.v-snack .v-snack__content p {
+  margin-bottom: 4px;
+  margin-top: 4px;
+}
+</style>
 </style>
