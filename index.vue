@@ -72,6 +72,10 @@ export default {
         return {}
       }
     },
+    iframeResizer: {
+      type: Boolean,
+      default: true
+    },
     redrawOnResize: {
       type: Boolean,
       default: false
@@ -79,6 +83,10 @@ export default {
     lazy: {
       type: Boolean,
       default: true
+    },
+    scrolling: {
+      type: String,
+      default: 'no'
     },
     goToOptions: {
       type: Object,
@@ -115,7 +123,7 @@ export default {
       return {
         id: this.id,
         src: this.originalSrc,
-        scrolling: 'no',
+        scrolling: this.scrolling,
         frameborder: 0,
         loading: this.lazy ? 'lazy' : 'eager',
         ...this.iframeAttrs
@@ -202,10 +210,11 @@ export default {
   methods: {
     iframeLoaded () {
       this.loaded = true
-
-      if (!window.iFrameResize) console.log('iframe-resizer is not available.')
+      if (!this.iframeResizer) return
+      if (!window.iFrameResize) console.error('iframe-resizer is not available.')
       else {
-        // always try to apply ifrmae resizer, it it is not loaded inside the iframe it will do nothing
+        if (this.scrolling !== 'no') console.error('iframeResizer=true is only compatible with scrolling=no.')
+        // always try to apply iframe resizer, it it is not loaded inside the iframe it will do nothing
         window.iFrameResize({
           log: debugIframeResizer.enabled,
           scrolling: 'no',
