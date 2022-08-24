@@ -99,6 +99,22 @@ export default {
       default() {
         return { tile: true, right: true, bottom: true, timeout: 30000 }
       }
+    },
+    syncQueryParams: {
+      type: Boolean,
+      default: false
+    },
+    queryParamsExclude: {
+      type: Array,
+      default: null
+    },
+    queryParamsInclude: {
+      type: Array,
+      default: null
+    },
+    queryParamsExtra: {
+      type: Object,
+      default: () => ({})
     }
   },
   data: () => ({
@@ -141,24 +157,15 @@ export default {
   watch: {
     src: {
       handler() {
-        if (!this.src || !this.originalSrc || !this.iframeWindow) {
-          this.originalSrc = this.src
-        } else {
-          // replacing location instead of changing src prevents interacting with the browser history
-          this.debug('replace location after change', this.src)
-          try {
-            this.iframeWindow.location.replace(this.src)
-          } catch (err) {
-            this.debug('failure to replace location', err)
-            this.originalSrc = this.src
-          }
-        }
+        this.setSrc()
       },
       immediate: true
     }
   },
-  mounted() {
+  created() {
     this.debug = debugVIframe.extend(this.id)
+  },
+  mounted() {
     this.debug('mount', this.src)
     // wait for context to be rendered and hopefully have definitive width (dialogs, etc)
     if (this.delay !== null) {
@@ -196,6 +203,9 @@ export default {
           }
           this.setNotification(e.data.uiNotification)
         }
+        if (e.data.query) {
+          this.applyQuery(e.data.query)
+        }
       } else {
         debugVIframe('transmit message', e.data)
         this.$emit('message', e.data)
@@ -208,6 +218,58 @@ export default {
     window.removeEventListener('resize', this.resizeListener)
   },
   methods: {
+    setSrc() {
+      if (!this.src) {
+        this.originalSrc = this.src
+        return
+      }
+      const srcUrl = new URL(this.src, window.location.href)
+      if (this.syncQueryParams) {
+        const searchParams = new URL(window.location.href).searchParams
+        if (this.queryParamsExtra) {
+          Object.keys(this.queryParamsExtra).forEach(key => {
+            searchParams.set(key, this.queryParamsExtra[key])
+          })
+        }
+        if (this.queryParamsInclude) {
+          for (const key of searchParams.keys()) {
+            if (!this.queryParamsInclude.includes(key)) searchParams.delete(key)
+          }
+        }
+        if (this.queryParamsExclude) {
+          this.queryParamsExclude.forEach(key => {
+            searchParams.delete(key)
+          })
+        }
+        for (const key of searchParams.keys()) {
+          srcUrl.searchParams.set(key, searchParams.get(key))
+        }
+        debugVIframe('apply query from parent to iframe', searchParams, srcUrl.href)
+      }
+      if (!this.originalSrc || !this.iframeWindow) {
+        this.originalSrc = srcUrl.href
+      } else {
+        // replacing location instead of changing src prevents interacting with the browser history
+        this.debug('replace location after change', srcUrl.href)
+        try {
+          this.iframeWindow.location.replace(srcUrl.href)
+        } catch (err) {
+          this.debug('failure to replace location', err)
+          this.originalSrc = srcUrl.href
+        }
+      }
+    },
+    applyQuery(query) {
+      const currentUrl = new URL(window.location.href)
+      Object.keys(query).forEach(key => {
+        if (this.queryParamsExtra && key in this.queryParamsExtra) return
+        if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) return
+        if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) return
+        currentUrl.searchParams.set(key, query[key])
+      })
+      debugVIframe('apply query from iframe to parent', currentUrl.href)
+      history.pushState(null, '', currentUrl.href)
+    },
     iframeLoaded () {
       this.loaded = true
       if (!this.iframeResizer) return
