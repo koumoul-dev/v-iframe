@@ -203,8 +203,8 @@ export default {
           }
           this.setNotification(e.data.uiNotification)
         }
-        if (e.data.query) {
-          this.applyQuery(e.data.query)
+        if (e.data.queryParams) {
+          this.applyQueryParams(e.data.queryParams)
         }
       } else {
         debugVIframe('transmit message', e.data)
@@ -259,7 +259,7 @@ export default {
         }
       }
     },
-    applyQuery(query) {
+    applyQueryParams(query) {
       const currentUrl = new URL(window.location.href)
       Object.keys(query).forEach(key => {
         if (this.queryParamsExtra && key in this.queryParamsExtra) return
