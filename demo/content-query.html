@@ -5,12 +5,6 @@
     <title></title>
   </head>
   <body>
-    <button onclick="syncQueryParams()">Change query params</button>
-    <div id="message-box"></div>
-    <script type="text/javascript">
-      window.syncQueryParams = function () {
-        window.parent.postMessage({viframe: true, query: {param1: '1'}})
-      }
-    </script>
+    <button onclick="window.parent.postMessage({viframe: true, queryParams: {param1: '1'}})">Change query params</button>
   </body>
 </html>

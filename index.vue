@@ -261,12 +261,17 @@ export default {
     },
     applyQueryParams(query) {
       const currentUrl = new URL(window.location.href)
-      Object.keys(query).forEach(key => {
-        if (this.queryParamsExtra && key in this.queryParamsExtra) return
-        if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) return
-        if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) return
+      for (const key of currentUrl.searchParams.keys()) {
+        if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
+        if (key in query) continue
+        currentUrl.searchParams.delete(key)
+      }
+      for (const key of Object.keys(query)) {
+        if (this.queryParamsExtra && key in this.queryParamsExtra) continue
+        if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) continue
+        if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
         currentUrl.searchParams.set(key, query[key])
-      })
+      }
       debugVIframe('apply query from iframe to parent', currentUrl.href)
       history.pushState(null, '', currentUrl.href)
     },
