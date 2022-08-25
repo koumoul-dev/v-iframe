@@ -3,6 +3,8 @@
     return
   }
 
+  window.parent.postMessage({ viframe: true, contentWindow: true }, '*')
+
   // monkey patch pushState and replaceState to send all state change info to the parent window
   // used by v-iframe sync-state option to sync iframe state with parent URL params
   var oldReplaceState = window.history.replaceState

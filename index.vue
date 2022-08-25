@@ -124,7 +124,8 @@ export default {
     appliedSrc: null,
     notification: null,
     showNotification: false,
-    syncedSrc: {}
+    syncedSrc: {},
+    contentWindowRegistered: false
   }),
   computed: {
     actualAspectRatio() {
@@ -263,6 +264,10 @@ export default {
             this.storeState(e.data.stateAction)
           }
         }
+        // send by content-window.js to signify that this iframe content is capable of syncing state, etc
+        if (e.data.contentWindow) {
+          this.contentWindowRegistered = true
+        }
       } else {
         debugVIframe('transmit message', e.data)
         this.$emit('message', e.data)
@@ -281,7 +286,6 @@ export default {
         this.appliedSrc = this.src
         return
       }
-      if (this.appliedSrc === this.fullSrc) return
       if (this.syncedSrc === this.fullSrc) return
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
@@ -292,8 +296,18 @@ export default {
         this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
-        this.debug('replace location after change', this.fullSrc)
-        this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
+        if (this.contentWindowRegistered) {
+          this.debug('replace location after change using postMessage', this.fullSrc)
+          this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
+        } else {
+          this.debug('replace location after change using iframe.location.replace', this.fullSrc)
+          try {
+            this.iframeWindow.location.replace(this.fullSrc)
+          } catch (err) {
+            this.debug('failure to replace location', err)
+            this.appliedSrc = this.fullSrc
+          }
+        }
       }
     },
     storeState(action) {
