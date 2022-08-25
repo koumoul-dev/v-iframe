@@ -34,9 +34,12 @@
           iframe with scrollTo instructions
           <v-iframe ref="iframeScroll" src="./content-scroll.html" class="elevation-3" style="height: 1500px" />
         </v-col>-->
-        <v-col cols="12" sm="6" lg="4" xl="3">
-          iframe with nav synchronization ({{ syncedState }})
-          <v-btn :disabled="$router.currentRoute.query.param1 === 'parent'" @click="$router.push({path: $router.currentRoute.path, query: {param1: 'parent'}})">
+        <v-col cols="12" sm="8" lg="8" xl="4">
+          <p>iframe with nav synchronization</p>
+          <p>sync state: {{ syncedState }}</p>
+          <p>param1: {{ $route.query.param1 }}</p>
+          <p>child path: {{ $route.query.p }}</p>
+          <v-btn :disabled="$route.query.param1 === 'parent'" @click="$router.push({path: $route.path, query: {param1: 'parent'}})">
             Push query param from parent
           </v-btn>
           <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />

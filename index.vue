@@ -155,7 +155,7 @@ export default {
       return props
     },
     fullSrc() {
-      const srcUrl = new URL(this.src, window.location.href)
+      const fullSrcUrl = new URL(this.src, window.location.href)
       if (this.syncState) {
         let query
         if (this.$route) {
@@ -183,13 +183,18 @@ export default {
         }
         for (const key of Object.keys(query).filter(key => query[key] !== undefined && query[key] !== null)) {
           if (key === 'p') {
-            srcUrl.pathname = query.p
+            let prefix = fullSrcUrl.pathname
+            if (!prefix.endsWith('/')) prefix += '/'
+            fullSrcUrl.pathname = query.p
+            if (query.p.startsWith('./')) {
+              fullSrcUrl.pathname = query.p.replace('./', prefix)
+            }
           } else {
-            srcUrl.searchParams.set(key, query[key])
+            fullSrcUrl.searchParams.set(key, query[key])
           }
         }
       }
-      return srcUrl.href
+      return fullSrcUrl.href
     }
   },
   watch: {
@@ -312,7 +317,11 @@ export default {
         currentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
       }
       if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
-        currentUrl.searchParams.set('p', syncedSrcUrl.pathname)
+        let prefix = originalSrcUrl.pathname
+        if (!prefix.endsWith('/')) prefix += '/'
+        let p = syncedSrcUrl.pathname
+        if (p.startsWith(prefix)) p = p.replace(prefix, './')
+        currentUrl.searchParams.set('p', p)
       }
       if (currentUrl.href === window.location.href) return
       if (this.$route && this.$router) {

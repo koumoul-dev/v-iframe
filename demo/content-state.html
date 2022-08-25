@@ -10,10 +10,12 @@
     <button onclick="navigate(false)">Replace query param from child</button>
     <button onclick="navigate(true, true)">Toggle path</button>
     <div id="href-box"></div>
+    <div id="param1-box"></div>
     <script type="text/javascript">
       console.log('load content-state.html')
       function showHref() {
         document.getElementById('href-box').innerText = window.location.href;
+        document.getElementById('param1-box').innerText = new URL(window.location.href).searchParams.get('param1');
       }
       showHref();
       window.addEventListener('popstate', function (e) {
@@ -25,10 +27,10 @@
         nbpushQueryParam += 1;
         // apply query param locally
         const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('param1', 'value' + nbpushQueryParam);
+        currentUrl.searchParams.set('param1', 'value#' + nbpushQueryParam);
         if (togglePath) {
           if (currentUrl.pathname === '/demo/content-state.html') {
-            currentUrl.pathname = '/demo/another-path'
+            currentUrl.pathname = '/demo/content-state.html/another-page'
           } else {
             currentUrl.pathname = '/demo/content-state.html'
           }
