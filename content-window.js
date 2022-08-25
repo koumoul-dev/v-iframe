@@ -5,10 +5,10 @@
 
   // monkey patch pushState and replaceState to send all state change info to the parent window
   // used by v-iframe sync-state option to sync iframe state with parent URL params
-  var oldPushState = window.history.pushState
   var oldReplaceState = window.history.replaceState
   window.history.pushState = function pushState() {
-    var ret = oldPushState.apply(this, arguments)
+    // do a replace instead of a push, the push will be done in the parent window if sync-state is activated
+    var ret = oldReplaceState.apply(this, arguments)
     window.parent.postMessage({ viframe: true, stateAction: 'push', href: window.location.href }, '*')
     return ret
   }
@@ -17,7 +17,4 @@
     window.parent.postMessage({ viframe: true, stateAction: 'replace', href: window.location.href }, '*')
     return ret
   }
-  window.addEventListener('popstate', function (e) {
-    window.parent.postMessage({ viframe: true, stateAction: 'pop', href: window.location.href }, '*')
-  })
 })()

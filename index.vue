@@ -216,6 +216,11 @@ export default {
     }
     window.addEventListener('resize', this.resizeListener)
 
+    this.popStateListener = (e) => {
+      this.setSrc()
+    }
+    window.addEventListener('popstate', this.popStateListener)
+
     // transmit message from iframe as a message event
     this.messageEventListener = (e) => {
       if (e.source !== this.iframeWindow) return
@@ -237,7 +242,7 @@ export default {
           this.syncedSrc = e.data.href
           this.emitState()
           if (this.syncState) {
-            this.storeState()
+            this.storeState(e.data.stateAction)
           }
         }
       } else {
@@ -250,6 +255,7 @@ export default {
   destroyed() {
     window.removeEventListener('message', this.messageEventListener)
     window.removeEventListener('resize', this.resizeListener)
+    window.removeEventListener('popstate', this.popStateListener)
   },
   methods: {
     setSrc() {
@@ -257,6 +263,7 @@ export default {
         this.appliedSrc = this.src
         return
       }
+      if (this.appliedSrc === this.fullSrc) return
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
         this.emitState()
@@ -275,7 +282,7 @@ export default {
         }
       }
     },
-    storeState() {
+    storeState(action) {
       const currentUrl = new URL(window.location.href)
       const originalSrcUrl = new URL(this.src, window.location.href)
       const syncedSrcUrl = new URL(this.syncedSrc)
@@ -294,7 +301,11 @@ export default {
         currentUrl.searchParams.set('p', syncedSrcUrl.pathname)
       }
       debugVIframe('apply state from iframe to parent', this.syncedSrc, currentUrl.href)
-      history.replaceState(null, '', currentUrl.href)
+      if (action === 'push') {
+        history.pushState(null, '', currentUrl.href)
+      } else {
+        history.replaceState(null, '', currentUrl.href)
+      }
     },
     iframeLoaded () {
       this.loaded = true
