@@ -36,6 +36,9 @@
         </v-col>-->
         <v-col cols="12" sm="6" lg="4" xl="3">
           iframe with nav synchronization ({{ syncedState }})
+          <v-btn :disabled="$router.currentRoute.query.param1 === 'parent'" @click="$router.push({path: $router.currentRoute.path, query: {param1: 'parent'}})">
+            Push query param from parent
+          </v-btn>
           <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
         </v-col>
       </v-row>

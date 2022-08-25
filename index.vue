@@ -157,27 +157,35 @@ export default {
     fullSrc() {
       const srcUrl = new URL(this.src, window.location.href)
       if (this.syncState) {
-        const searchParams = new URL(window.location.href).searchParams
+        let query
+        if (this.$route) {
+          query = { ...this.$route.query }
+        } else {
+          const searchParams = new URL(window.location.href).searchParams
+          for (const key of searchParams.keys()) {
+            query[key] = searchParams.get
+          }
+        }
         if (this.queryParamsExtra) {
           Object.keys(this.queryParamsExtra).forEach(key => {
-            searchParams.set(key, this.queryParamsExtra[key])
+            query[key] = this.queryParamsExtra[key]
           })
         }
         if (this.queryParamsInclude) {
-          for (const key of searchParams.keys()) {
-            if (!this.queryParamsInclude.includes(key) && key !== 'p') searchParams.delete(key)
+          for (const key of Object.keys(query)) {
+            if (!this.queryParamsInclude.includes(key) && key !== 'p') delete query[key]
           }
         }
         if (this.queryParamsExclude) {
           this.queryParamsExclude.forEach(key => {
-            searchParams.delete(key)
+            delete query[key]
           })
         }
-        for (const key of searchParams.keys()) {
+        for (const key of Object.keys(query).filter(key => query[key] !== undefined && query[key] !== null)) {
           if (key === 'p') {
-            srcUrl.pathname = searchParams.get('p')
+            srcUrl.pathname = query.p
           } else {
-            srcUrl.searchParams.set(key, searchParams.get(key))
+            srcUrl.searchParams.set(key, query[key])
           }
         }
       }
@@ -190,6 +198,11 @@ export default {
         this.setSrc()
       },
       immediate: true
+    },
+    '$route.query'() {
+      this.$nextTick(() => {
+        this.setSrc()
+      })
     }
   },
   created() {
@@ -264,10 +277,11 @@ export default {
         return
       }
       if (this.appliedSrc === this.fullSrc) return
+      if (this.syncedSrc === this.fullSrc) return
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
         this.emitState()
-        debugVIframe('apply state from parent to iframe', window.location.href, this.syncedSrc)
+        debugVIframe('apply state from parent to iframe', window.location.href, this.appliedSrc, this.syncedSrc)
       }
       if (!this.appliedSrc || !this.iframeWindow) {
         this.appliedSrc = this.fullSrc
@@ -300,11 +314,29 @@ export default {
       if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
         currentUrl.searchParams.set('p', syncedSrcUrl.pathname)
       }
-      debugVIframe('apply state from iframe to parent', this.syncedSrc, currentUrl.href)
-      if (action === 'push') {
-        history.pushState(null, '', currentUrl.href)
+      if (this.$route && this.$router) {
+        const query = { ...this.$route.query }
+        for (const key of currentUrl.searchParams.keys()) {
+          query[key] = currentUrl.searchParams.get(key)
+        }
+        for (const key of Object.keys(query)) {
+          if (!currentUrl.searchParams.has(key)) {
+            query[key] = undefined
+          }
+        }
+        debugVIframe('apply state from iframe to parent using vue router', this.syncedSrc, query)
+        if (action === 'push') {
+          this.$router.push({ path: this.$route.fullPath, query })
+        } else {
+          this.$router.replace({ path: this.$route.fullPath, query })
+        }
       } else {
-        history.replaceState(null, '', currentUrl.href)
+        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, currentUrl.searchParams)
+        if (action === 'push') {
+          history.pushState(null, '', currentUrl.href)
+        } else {
+          history.replaceState(null, '', currentUrl.href)
+        }
       }
     },
     iframeLoaded () {
