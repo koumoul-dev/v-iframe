@@ -244,7 +244,7 @@ export default {
       if (e.source !== this.iframeWindow) return
       if (typeof e.data === 'string' && (e.data.startsWith('[iFrameResizer]') || e.data.startsWith('[iFrameSizer'))) {
         console.log('nothing todo')
-      } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe)) {
+      } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
         debugVIframe('perform action', e.data)
         if (e.data.scroll === 'top') this.$vuetify.goTo('#' + this.id, this.goToOptions)
@@ -293,47 +293,42 @@ export default {
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
         this.debug('replace location after change', this.fullSrc)
-        try {
-          this.iframeWindow.location.replace(this.fullSrc)
-        } catch (err) {
-          this.debug('failure to replace location', err)
-          this.appliedSrc = this.fullSrc
-        }
+        this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
       }
     },
     storeState(action) {
-      const currentUrl = new URL(window.location.href)
+      const newParentUrl = new URL(window.location.href)
       const originalSrcUrl = new URL(this.src, window.location.href)
       const syncedSrcUrl = new URL(this.syncedSrc)
-      for (const key of currentUrl.searchParams.keys()) {
+      for (const key of newParentUrl.searchParams.keys()) {
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
         if (syncedSrcUrl.searchParams.has(key)) continue
-        currentUrl.searchParams.delete(key)
+        newParentUrl.searchParams.delete(key)
       }
       for (const key of syncedSrcUrl.searchParams.keys()) {
         if (this.queryParamsExtra && key in this.queryParamsExtra) continue
         if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) continue
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
-        currentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
+        newParentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
       }
       if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
         let prefix = originalSrcUrl.pathname
         if (!prefix.endsWith('/')) prefix += '/'
         let p = syncedSrcUrl.pathname
         if (p.startsWith(prefix)) p = p.replace(prefix, './')
-        currentUrl.searchParams.set('p', p)
+        newParentUrl.searchParams.set('p', p)
       }
-      if (currentUrl.href === window.location.href) return
       if (this.$route && this.$router) {
         const query = { ...this.$route.query }
-        for (const key of currentUrl.searchParams.keys()) {
-          query[key] = currentUrl.searchParams.get(key)
+        for (const key of newParentUrl.searchParams.keys()) {
+          query[key] = newParentUrl.searchParams.get(key)
         }
         for (const key of Object.keys(query)) {
-          if (!currentUrl.searchParams.has(key)) {
+          if (!newParentUrl.searchParams.has(key)) {
             query[key] = undefined
           }
         }
+        if (JSON.stringify(query) === JSON.stringify(this.$route.query)) return
         debugVIframe('apply state from iframe to parent using vue router', this.syncedSrc, query)
         if (action === 'push') {
           this.$router.push({ path: this.$route.fullPath, query })
@@ -341,11 +336,12 @@ export default {
           this.$router.replace({ path: this.$route.fullPath, query })
         }
       } else {
-        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, currentUrl.search)
+        if (newParentUrl.href === window.location.href) return
+        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, newParentUrl.search)
         if (action === 'push') {
-          history.pushState(null, '', currentUrl.href)
+          history.pushState(null, '', newParentUrl.href)
         } else {
-          history.replaceState(null, '', currentUrl.href)
+          history.replaceState(null, '', newParentUrl.href)
         }
       }
     },
