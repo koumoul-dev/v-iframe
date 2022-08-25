@@ -100,7 +100,7 @@ export default {
         return { tile: true, right: true, bottom: true, timeout: 30000 }
       }
     },
-    syncQueryParams: {
+    syncState: {
       type: Boolean,
       default: false
     },
@@ -121,9 +121,10 @@ export default {
     loaded: true,
     resized: false,
     actualWidth: null,
-    originalSrc: null,
+    appliedSrc: null,
     notification: null,
-    showNotification: false
+    showNotification: false,
+    syncedSrc: {}
   }),
   computed: {
     actualAspectRatio() {
@@ -138,7 +139,7 @@ export default {
     fullIframeAttrs() {
       return {
         id: this.id,
-        src: this.originalSrc,
+        src: this.appliedSrc,
         scrolling: this.scrolling,
         frameborder: 0,
         loading: this.lazy ? 'lazy' : 'eager',
@@ -152,6 +153,35 @@ export default {
       if (this.notification.type === 'default') props.text = true
       props.color = this.notification.type
       return props
+    },
+    fullSrc() {
+      const srcUrl = new URL(this.src, window.location.href)
+      if (this.syncState) {
+        const searchParams = new URL(window.location.href).searchParams
+        if (this.queryParamsExtra) {
+          Object.keys(this.queryParamsExtra).forEach(key => {
+            searchParams.set(key, this.queryParamsExtra[key])
+          })
+        }
+        if (this.queryParamsInclude) {
+          for (const key of searchParams.keys()) {
+            if (!this.queryParamsInclude.includes(key) && key !== 'p') searchParams.delete(key)
+          }
+        }
+        if (this.queryParamsExclude) {
+          this.queryParamsExclude.forEach(key => {
+            searchParams.delete(key)
+          })
+        }
+        for (const key of searchParams.keys()) {
+          if (key === 'p') {
+            srcUrl.pathname = searchParams.get('p')
+          } else {
+            srcUrl.searchParams.set(key, searchParams.get(key))
+          }
+        }
+      }
+      return srcUrl.href
     }
   },
   watch: {
@@ -203,8 +233,12 @@ export default {
           }
           this.setNotification(e.data.uiNotification)
         }
-        if (e.data.queryParams) {
-          this.applyQueryParams(e.data.queryParams)
+        if (e.data.stateAction && e.data.href) {
+          this.syncedSrc = e.data.href
+          this.emitState()
+          if (this.syncState) {
+            this.storeState()
+          }
         }
       } else {
         debugVIframe('transmit message', e.data)
@@ -220,60 +254,47 @@ export default {
   methods: {
     setSrc() {
       if (!this.src) {
-        this.originalSrc = this.src
+        this.appliedSrc = this.src
         return
       }
-      const srcUrl = new URL(this.src, window.location.href)
-      if (this.syncQueryParams) {
-        const searchParams = new URL(window.location.href).searchParams
-        if (this.queryParamsExtra) {
-          Object.keys(this.queryParamsExtra).forEach(key => {
-            searchParams.set(key, this.queryParamsExtra[key])
-          })
-        }
-        if (this.queryParamsInclude) {
-          for (const key of searchParams.keys()) {
-            if (!this.queryParamsInclude.includes(key)) searchParams.delete(key)
-          }
-        }
-        if (this.queryParamsExclude) {
-          this.queryParamsExclude.forEach(key => {
-            searchParams.delete(key)
-          })
-        }
-        for (const key of searchParams.keys()) {
-          srcUrl.searchParams.set(key, searchParams.get(key))
-        }
-        debugVIframe('apply query from parent to iframe', searchParams, srcUrl.href)
+      if (this.syncState) {
+        this.syncedSrc = this.fullSrc
+        this.emitState()
+        debugVIframe('apply state from parent to iframe', window.location.href, this.syncedSrc)
       }
-      if (!this.originalSrc || !this.iframeWindow) {
-        this.originalSrc = srcUrl.href
+      if (!this.appliedSrc || !this.iframeWindow) {
+        this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
-        this.debug('replace location after change', srcUrl.href)
+        this.debug('replace location after change', this.fullSrc)
         try {
-          this.iframeWindow.location.replace(srcUrl.href)
+          this.iframeWindow.location.replace(this.fullSrc)
         } catch (err) {
           this.debug('failure to replace location', err)
-          this.originalSrc = srcUrl.href
+          this.appliedSrc = this.fullSrc
         }
       }
     },
-    applyQueryParams(query) {
+    storeState() {
       const currentUrl = new URL(window.location.href)
+      const originalSrcUrl = new URL(this.src, window.location.href)
+      const syncedSrcUrl = new URL(this.syncedSrc)
       for (const key of currentUrl.searchParams.keys()) {
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
-        if (key in query) continue
+        if (syncedSrcUrl.searchParams.has(key)) continue
         currentUrl.searchParams.delete(key)
       }
-      for (const key of Object.keys(query)) {
+      for (const key of syncedSrcUrl.searchParams.keys()) {
         if (this.queryParamsExtra && key in this.queryParamsExtra) continue
         if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) continue
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
-        currentUrl.searchParams.set(key, query[key])
+        currentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
       }
-      debugVIframe('apply query from iframe to parent', currentUrl.href)
-      history.pushState(null, '', currentUrl.href)
+      if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
+        currentUrl.searchParams.set('p', syncedSrcUrl.pathname)
+      }
+      debugVIframe('apply state from iframe to parent', this.syncedSrc, currentUrl.href)
+      history.replaceState(null, '', currentUrl.href)
     },
     iframeLoaded () {
       this.loaded = true
@@ -335,6 +356,9 @@ export default {
       notif.type = notif.type || 'default'
       this.notification = notif
       this.showNotification = true
+    },
+    emitState() {
+      this.$emit('state', { href: this.syncedSrc })
     }
   }
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="/content-window.js"></script>
+  </head>
+  <body>
+    <button onclick="navigate(true)">Push query param from child</button>
+    <button onclick="navigate(false)">Replace query param from child</button>
+    <button onclick="navigate(true, true)">Toggle path</button>
+    <div id="href-box"></div>
+    <script type="text/javascript">
+      function showHref() {
+        document.getElementById('href-box').innerText = window.location.href;
+      }
+      showHref();
+      window.addEventListener('popstate', function (e) {
+        showHref();
+      });
+
+      nbpushQueryParam = 0;
+      function navigate (push, togglePath) {
+        nbpushQueryParam += 1;
+        // apply query param locally
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('param1', 'value' + nbpushQueryParam);
+        if (togglePath) {
+          if (currentUrl.pathname === '/demo/content-state.html') {
+            currentUrl.pathname = '/demo/another-path'
+          } else {
+            currentUrl.pathname = '/demo/content-state.html'
+          }
+        }
+        if (push) {
+          history.pushState(null, '', currentUrl);
+        } else {
+          history.replaceState(null, '', currentUrl);
+        }
+        showHref();
+      }
+    </script>
+  </body>
+</html>

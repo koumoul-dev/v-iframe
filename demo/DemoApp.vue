@@ -2,7 +2,7 @@
   <v-app>
     <v-container>
       <v-row>
-        <v-col cols="12" sm="6" lg="4" xl="3">
+        <!--<v-col cols="12" sm="6" lg="4" xl="3">
           iframe with default aspect ratio
           <v-iframe src="./content-auto-resize.html" class="elevation-3" />
         </v-col>
@@ -33,10 +33,10 @@
         <v-col cols="12" sm="6" lg="4" xl="3">
           iframe with scrollTo instructions
           <v-iframe ref="iframeScroll" src="./content-scroll.html" class="elevation-3" style="height: 1500px" />
-        </v-col>
+        </v-col>-->
         <v-col cols="12" sm="6" lg="4" xl="3">
-          iframe with query params synchronization
-          <v-iframe src="./content-query.html" :sync-query-params="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" />
+          iframe with nav synchronization ({{ syncedState }})
+          <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
         </v-col>
       </v-row>
     </v-container>
@@ -48,6 +48,11 @@ import VIframe from '../index.vue'
 
 export default {
   components: { VIframe },
+  data() {
+    return {
+      syncedState: {}
+    }
+  },
   methods: {
     onMessage(message) {
       console.log('received message from iframe', message)
