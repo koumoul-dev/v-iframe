@@ -314,6 +314,7 @@ export default {
       if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
         currentUrl.searchParams.set('p', syncedSrcUrl.pathname)
       }
+      if (currentUrl.href === window.location.href) return
       if (this.$route && this.$router) {
         const query = { ...this.$route.query }
         for (const key of currentUrl.searchParams.keys()) {
@@ -331,7 +332,7 @@ export default {
           this.$router.replace({ path: this.$route.fullPath, query })
         }
       } else {
-        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, currentUrl.searchParams)
+        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, currentUrl.search)
         if (action === 'push') {
           history.pushState(null, '', currentUrl.href)
         } else {
