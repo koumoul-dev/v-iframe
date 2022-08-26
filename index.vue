@@ -163,7 +163,7 @@ export default {
           query = { ...this.$route.query }
         } else {
           const searchParams = new URL(window.location.href).searchParams
-          for (const key of searchParams.keys()) {
+          for (const key of [...searchParams.keys()]) {
             query[key] = searchParams.get
           }
         }
@@ -241,10 +241,10 @@ export default {
     this.messageEventListener = (e) => {
       if (e.source !== this.iframeWindow) return
       if (typeof e.data === 'string' && (e.data.startsWith('[iFrameResizer]') || e.data.startsWith('[iFrameSizer'))) {
-        console.log('nothing todo')
+        // nothing to do
       } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
-        debugVIframe('perform action', e.data)
+        debugVIframe('received action message from iframe', e.data)
         if (e.data.scroll === 'top') this.$vuetify.goTo('#' + this.id, this.goToOptions)
         if (typeof e.data.scroll === 'number') this.$vuetify.goTo('#' + this.id, { ...this.goToOptions, offset: -e.data.scroll })
         if (e.data.uiNotification) {
@@ -312,12 +312,12 @@ export default {
       const newParentUrl = new URL(window.location.href)
       const originalSrcUrl = new URL(this.src, window.location.href)
       const syncedSrcUrl = new URL(this.syncedSrc)
-      for (const key of newParentUrl.searchParams.keys()) {
+      for (const key of [...newParentUrl.searchParams.keys()]) {
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
         if (syncedSrcUrl.searchParams.has(key)) continue
         newParentUrl.searchParams.delete(key)
       }
-      for (const key of syncedSrcUrl.searchParams.keys()) {
+      for (const key of [...syncedSrcUrl.searchParams.keys()]) {
         if (this.queryParamsExtra && key in this.queryParamsExtra) continue
         if (this.queryParamsInclude && !this.queryParamsInclude.includes(key)) continue
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
@@ -332,7 +332,7 @@ export default {
       }
       if (this.$route && this.$router) {
         const query = { ...this.$route.query }
-        for (const key of newParentUrl.searchParams.keys()) {
+        for (const key of [...newParentUrl.searchParams.keys()]) {
           query[key] = newParentUrl.searchParams.get(key)
         }
         for (const key of Object.keys(query)) {
