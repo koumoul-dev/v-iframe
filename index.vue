@@ -211,11 +211,8 @@ export default {
       })
     }
   },
-  created() {
-    this.debug = debugVIframe.extend(this.id)
-  },
   mounted() {
-    this.debug('mount', this.src)
+    debugVIframe('mount', this.src)
     // wait for context to be rendered and hopefully have definitive width (dialogs, etc)
     if (this.delay !== null) {
       setTimeout(() => this.resize(), this.delay)
@@ -293,18 +290,19 @@ export default {
         debugVIframe('apply state from parent to iframe', window.location.href, this.appliedSrc, this.syncedSrc)
       }
       if (!this.appliedSrc || !this.iframeWindow) {
+        debugVIframe('set initial appliedSrc', this.fullSrc)
         this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
         if (this.contentWindowRegistered) {
-          this.debug('replace location after change using postMessage', this.fullSrc)
+          debugVIframe('replace location after change using postMessage', this.fullSrc)
           this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
         } else {
-          this.debug('replace location after change using iframe.location.replace', this.fullSrc)
+          debugVIframe('replace location after change using iframe.location.replace', this.fullSrc)
           try {
             this.iframeWindow.location.replace(this.fullSrc)
           } catch (err) {
-            this.debug('failure to replace location', err)
+            debugVIframe('failure to replace location', err)
             this.appliedSrc = this.fullSrc
           }
         }
@@ -378,14 +376,14 @@ export default {
     },
     resize() {
       const newWidth = this.$el.getBoundingClientRect().width
-      this.debug(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
+      debugVIframe(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
 
       if (this.actualWidth === newWidth) return
       if (!newWidth) return
       if (this.actualWidth !== null && this.redrawOnResize) {
         // another nextTick to force a redraw of the iframe
         // it might create a flicking effect, but the iframe content might not manage resizing correctly
-        this.debug('force iframe redraw after resize', this.actualWidth, newWidth)
+        debugVIframe('force iframe redraw after resize', this.actualWidth, newWidth)
         this.iframeWindow = null
         this.actualWidth = null
         this.$nextTick(() => this.applyNewWidth(newWidth))
@@ -395,7 +393,7 @@ export default {
     },
     applyNewWidth(newWidth, recurse = true) {
       this.actualWidth = newWidth
-      this.debug(`applied new width, width=${this.actualWidth}, aspectRatio=${this.actualAspectRatio}`)
+      debugVIframe(`applied new width, width=${this.actualWidth}, aspectRatio=${this.actualAspectRatio}`)
       // another nextTick to wait for iframe to be rendered now that actualWidth was defined
       this.$nextTick(() => {
         const iframeElement = this.$el.getElementsByTagName('iframe')[0]
@@ -406,7 +404,7 @@ export default {
         this.iframeWindow = iframeElement.contentWindow
         setTimeout(() => {
           const rect = iframeElement.getBoundingClientRect()
-          this.debug('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+          debugVIframe('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
         }, 300)
       })
     },
