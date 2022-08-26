@@ -4,7 +4,9 @@
   "description": "Iframes with aspect ratio, iframe resizer integration and some corner cases. ",
   "main": "index.vue",
   "scripts": {
-    "dev": "NODE_ENV=development webpack-dev-server --disable-host-check"
+    "dev": "NODE_ENV=development webpack-dev-server --disable-host-check",
+    "build": "terser --compress --mangle -o content-window.min.js -- content-window.js",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -35,6 +37,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.3",
     "mini-css-extract-plugin": "^0.8.0",
+    "terser": "^5.15.0",
     "vue": "^2.6.10",
     "vue-loader": "^15.7.1",
     "vue-router": "^3.6.4",
