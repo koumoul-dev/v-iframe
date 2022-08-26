@@ -1,5 +1,5 @@
 (function (_window) {
-  if (!_window.history || !_window.parent || !_window.parent.postMessage || _window.parent === _window.self) {
+  if (!_window || !_window.history || !_window.parent || !_window.parent.postMessage || _window.parent === _window.self) {
     return
   }
 
@@ -38,4 +38,4 @@
       }
     }
   })
-})(window)
+})(typeof window !== 'undefined' && window)
