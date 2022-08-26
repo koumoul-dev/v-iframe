@@ -124,7 +124,7 @@ export default {
     appliedSrc: null,
     notification: null,
     showNotification: false,
-    syncedSrc: {},
+    syncedSrc: null,
     contentWindowRegistered: false
   }),
   computed: {
@@ -195,6 +195,7 @@ export default {
           }
         }
       }
+      fullSrcUrl.searchParams.sort()
       return fullSrcUrl.href
     }
   },
@@ -255,7 +256,9 @@ export default {
           this.setNotification(e.data.uiNotification)
         }
         if (e.data.stateAction && e.data.href) {
-          this.syncedSrc = e.data.href
+          const newSyncedSrcUrl = new URL(e.data.href)
+          newSyncedSrcUrl.searchParams.sort()
+          this.syncedSrc = newSyncedSrcUrl.href
           this.emitState()
           if (this.syncState) {
             this.storeState(e.data.stateAction)
@@ -284,10 +287,13 @@ export default {
         return
       }
       if (this.syncedSrc === this.fullSrc) return
+      debugVIframe(`apply state from parent to iframe
+  - parent query: ${window.location.search}
+  - new full src: ${this.fullSrc}
+  - current synced src: ${this.syncedSrc}`)
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
         this.emitState()
-        debugVIframe('apply state from parent to iframe', window.location.href, this.appliedSrc, this.syncedSrc)
       }
       if (!this.appliedSrc || !this.iframeWindow) {
         debugVIframe('set initial appliedSrc', this.fullSrc)
@@ -341,11 +347,14 @@ export default {
           }
         }
         if (JSON.stringify(query) === JSON.stringify(this.$route.query)) return
-        debugVIframe('apply state from iframe to parent using vue router', this.syncedSrc, query)
+        debugVIframe(`apply state from iframe to parent using vue router
+  - synced src: ${this.syncedSrc}
+  - current query: ${JSON.stringify(this.$route.query)}
+  - new query: ${JSON.stringify(query)}`)
         if (action === 'push') {
-          this.$router.push({ path: this.$route.fullPath, query })
+          this.$router.push({ query })
         } else {
-          this.$router.replace({ path: this.$route.fullPath, query })
+          this.$router.replace({ query })
         }
       } else {
         if (newParentUrl.href === window.location.href) return
