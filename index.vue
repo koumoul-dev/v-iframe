@@ -157,6 +157,11 @@ export default {
     },
     fullSrc() {
       const fullSrcUrl = new URL(this.src, window.location.href)
+      if (this.queryParamsExtra) {
+        Object.keys(this.queryParamsExtra).forEach(key => {
+          fullSrcUrl.searchParams.set(key, this.queryParamsExtra[key])
+        })
+      }
       if (this.syncState) {
         let query
         if (this.$route) {
@@ -166,11 +171,6 @@ export default {
           for (const key of [...searchParams.keys()]) {
             query[key] = searchParams.get
           }
-        }
-        if (this.queryParamsExtra) {
-          Object.keys(this.queryParamsExtra).forEach(key => {
-            query[key] = this.queryParamsExtra[key]
-          })
         }
         if (this.queryParamsInclude) {
           for (const key of Object.keys(query)) {
