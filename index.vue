@@ -169,7 +169,7 @@ export default {
         } else {
           const searchParams = new URL(window.location.href).searchParams
           for (const key of [...searchParams.keys()]) {
-            query[key] = searchParams.get
+            query[key] = searchParams.get(key)
           }
         }
         if (this.queryParamsInclude) {
