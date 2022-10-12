@@ -457,4 +457,3 @@ export default {
   margin-top: 4px;
 }
 </style>
-</style>

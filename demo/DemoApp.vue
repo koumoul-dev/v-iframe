@@ -44,6 +44,11 @@
           </v-btn>
           <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
         </v-col>
+        <!--<v-col cols="12" sm="8" lg="8" xl="4">
+          <p>iframe with nested nav synchronization</p>
+          <p>sync state: {{ syncedStateNested }}</p>
+          <v-iframe ref="iframeStateNested" src="./nested.html" :sync-state="true" class="elevation-3" @state="e => syncedStateNested = e" />
+        </v-col>-->
       </v-row>
     </v-container>
   </v-app>
@@ -56,7 +61,8 @@ export default {
   components: { VIframe },
   data() {
     return {
-      syncedState: {}
+      syncedState: {},
+      syncedStateNested: {}
     }
   },
   methods: {

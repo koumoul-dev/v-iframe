@@ -27,7 +27,7 @@
     return ret
   }
   _window.addEventListener('message', function onMessage(e) {
-    if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
+    if (e.source === _window.parent && typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
       if (e.data.href && e.data.stateAction) {
         log('v-iframe/content-window received instruction to navigate', e.data.href)
         var router = (_window.vIframeOptions && _window.vIframeOptions.router) || (_window.$nuxt && _window.$nuxt.$router)
