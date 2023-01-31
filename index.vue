@@ -48,6 +48,10 @@ export default {
       type: String,
       default: '100%'
     },
+    title: {
+      type: String,
+      default: null
+    },
     // if not given a default value will be processed
     // can be ignored if the iframe is managed by iframe-resizer or if a height is specified as style of the parent element
     aspectRatio: {
@@ -138,7 +142,7 @@ export default {
       return 21 / 9
     },
     fullIframeAttrs() {
-      return {
+      const attrs = {
         id: this.id,
         src: this.appliedSrc,
         scrolling: this.scrolling,
@@ -146,6 +150,8 @@ export default {
         loading: this.lazy ? 'lazy' : 'eager',
         ...this.iframeAttrs
       }
+      if (this.title) attrs.title = this.title
+      return attrs
     },
     fullSnackbarProps() {
       const props = { ...this.snackbarProps }
