@@ -34,13 +34,12 @@
         if (router) {
           var url = new URL(e.data.href)
           var query = {}
-          var keys = url.searchParams.keys()
-          for (var i = 0; i < keys.length; i++) {
-            query[keys[i]] = url.searchParams.get(keys[i])
-          }
+          url.searchParams.forEach((value, key) => {
+            query[key] = value
+          })
           var path = url.pathname.replace(router.options.base, '/')
           const routerParams = { path: path, query: query }
-          log('v-iframe/content-window navigate using vue router', routerParams)
+          log('v-iframe/content-window navigate using vue router', JSON.stringify(routerParams))
           router.replace(routerParams)
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')

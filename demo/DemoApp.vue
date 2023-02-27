@@ -42,6 +42,9 @@
           <v-btn :disabled="$route.query.param1 === 'parent'" @click="$router.push({path: $route.path, query: {param1: 'parent'}})">
             Push query param from parent
           </v-btn>
+          <v-btn :disabled="$route.query.param1 !== 'parent'" @click="$router.push({path: $route.path, query: {}})">
+            Remove query param from parent
+          </v-btn>
           <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
         </v-col>
         <!--<v-col cols="12" sm="8" lg="8" xl="4">
