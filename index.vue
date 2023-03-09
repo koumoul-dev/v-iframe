@@ -38,6 +38,8 @@ debugVIframe.log = console.log.bind(console)
 const debugIframeResizer = debug('iframe-resizer')
 const rand = () => Math.random().toString(36).substr(2, 5)
 
+const ssr = typeof window === 'undefined'
+
 export default {
   props: {
     src: {
@@ -162,6 +164,7 @@ export default {
       return props
     },
     fullSrc() {
+      if (ssr) return this.src
       const fullSrcUrl = new URL(this.src, window.location.href)
       if (this.queryParamsExtra) {
         Object.keys(this.queryParamsExtra).forEach(key => {
