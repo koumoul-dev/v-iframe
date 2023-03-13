@@ -47,8 +47,8 @@
     "webpack-dev-server": "^3.8.2"
   },
   "peerDependencies": {
-    "iframe-resizer": "*",
-    "vuetify": "*"
+    "iframe-resizer": "4",
+    "vuetify": "2"
   },
   "dependencies": {
     "debug": "^4.3.2"
