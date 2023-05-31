@@ -1,6 +1,6 @@
 {
   "name": "@koumoul/v-iframe",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Iframes with aspect ratio, iframe resizer integration and some corner cases. ",
   "main": "index.vue",
   "scripts": {
