@@ -32,7 +32,8 @@
 
 <script>
 
-const debug = require('debug')
+// import goTo from 'vuetify/lib/services/goto/index.mjs'
+import debug from 'debug'
 const debugVIframe = debug('v-iframe')
 debugVIframe.log = console.log.bind(console)
 const debugIframeResizer = debug('iframe-resizer')
@@ -255,8 +256,21 @@ export default {
       } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
         debugVIframe('received action message from iframe', e.data)
-        if (e.data.scroll === 'top') this.$vuetify.goTo('#' + this.id, this.goToOptions)
-        if (typeof e.data.scroll === 'number') this.$vuetify.goTo('#' + this.id, { ...this.goToOptions, offset: -e.data.scroll })
+        
+        if (e.data.scroll === 'top') {
+          if (this.$vuetify.goTo) {
+            this.$vuetify.goTo('#' + this.id, this.goToOptions)
+          } else {
+            this.goTo()
+          }
+        }
+        if (typeof e.data.scroll === 'number') {
+          if (this.$vuetify.goTo) {
+            goTo('#' + this.id, { ...this.goToOptions, offset: -e.data.scroll })
+          } else {
+            this.goTo(e.data.scroll)
+          }
+        }
         if (e.data.uiNotification) {
           if (this.showNotification) {
             this.showNotification = false
@@ -290,6 +304,16 @@ export default {
     window.removeEventListener('popstate', this.popStateListener)
   },
   methods: {
+    // simple temporary replacement of vuetify goTo
+    // TODO: make vuetify service work in this context
+    goTo(offset) {
+      debugVIframe('use internal goTo method instead of vuetify')
+      try {
+        this.$el.scrollIntoView({behavior: 'smooth'})
+      } catch(err) {
+        console.error(err)
+      }
+    },
     setSrc() {
       if (!this.src) {
         this.appliedSrc = this.src

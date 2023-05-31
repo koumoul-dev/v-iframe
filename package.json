@@ -4,7 +4,7 @@
   "description": "Iframes with aspect ratio, iframe resizer integration and some corner cases. ",
   "main": "index.vue",
   "scripts": {
-    "dev": "NODE_ENV=development webpack-dev-server --disable-host-check",
+    "dev": "cd demo && npm run dev",
     "build": "terser --compress --mangle -o content-window.min.js -- content-window.js",
     "prepare": "npm run build"
   },
@@ -24,11 +24,6 @@
   },
   "homepage": "https://github.com/koumoul-dev/v-iframe#readme",
   "devDependencies": {
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "babel-eslint": "^10.0.3",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^3.2.0",
     "eslint": "^6.1.0",
     "eslint-config-standard": "^13.0.1",
     "eslint-plugin-import": "^2.18.2",
@@ -36,19 +31,12 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.3",
-    "mini-css-extract-plugin": "^0.8.0",
-    "terser": "^5.15.0",
-    "vue": "^2.6.10",
-    "vue-loader": "^15.7.1",
-    "vue-router": "^3.6.4",
-    "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.8.2"
+    "terser": "^5.17.6",
+    "vuetify": "^3.3.2"
   },
   "peerDependencies": {
     "iframe-resizer": "4",
-    "vuetify": "2"
+    "vuetify": "3"
   },
   "dependencies": {
     "debug": "^4.3.2"

@@ -29,10 +29,10 @@
         const currentUrl = new URL(window.location);
         currentUrl.searchParams.set('param1', 'value#' + nbpushQueryParam);
         if (togglePath) {
-          if (currentUrl.pathname === '/demo/content-state.html') {
-            currentUrl.pathname = '/demo/content-state.html/another-page'
+          if (currentUrl.pathname === '/content-state.html') {
+            currentUrl.pathname = '/content-state.html/another-page'
           } else {
-            currentUrl.pathname = '/demo/content-state.html'
+            currentUrl.pathname = '/content-state.html'
           }
         }
         if (push) {
