@@ -32,14 +32,18 @@
 
 <script>
 
-// import goTo from 'vuetify/lib/services/goto/index.mjs'
-/*import Debug from 'debug'
-const debugVIframe = Debug('v-iframe')
-debugVIframe.log = console.log.bind(console)
-const debugIframeResizer = Debug('iframe-resizer')*/
 const rand = () => Math.random().toString(36).substr(2, 5)
 
 const ssr = typeof window === 'undefined'
+
+const isDebugActive = (key) => {
+  return !ssr && window.localStorage && window.localStorage.debug && window.localStorage.debug.indexOf(key) !== -1
+}
+const isVIFrameDebugActive = isDebugActive('v-iframe')
+const debugVIframe = () => {
+  if (isVIFrameDebugActive) console.log.apply(console, arguments)
+}
+const isIFrameResizerDebugActive = isDebugActive('iframe-resizer')
 
 export default {
   props: {
@@ -259,7 +263,7 @@ export default {
         // nothing to do
       } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
-        // debugVIframe('received action message from iframe', e.data)
+        debugVIframe('received action message from iframe', e.data)
         
         if (e.data.scroll === 'top') {
           if (this.$vuetify.goTo) {
@@ -311,7 +315,7 @@ export default {
     // simple temporary replacement of vuetify goTo
     // TODO: make vuetify service work in this context
     goTo(offset) {
-      // debugVIframe('use internal goTo method instead of vuetify')
+      debugVIframe('use internal goTo method instead of vuetify')
       try {
         this.$el.scrollIntoView({behavior: 'smooth'})
       } catch(err) {
@@ -338,14 +342,14 @@ export default {
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
         if (this.contentWindowRegistered) {
-          // debugVIframe('replace location after change using postMessage', this.fullSrc)
+          debugVIframe('replace location after change using postMessage', this.fullSrc)
           this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
         } else {
-          // debugVIframe('replace location after change using iframe.location.replace', this.fullSrc)
+          debugVIframe('replace location after change using iframe.location.replace', this.fullSrc)
           try {
             this.iframeWindow.location.replace(this.fullSrc)
           } catch (err) {
-            // debugVIframe('failure to replace location', err)
+            debugVIframe('failure to replace location, change src', err)
             this.appliedSrc = this.fullSrc
           }
         }
@@ -395,7 +399,7 @@ export default {
         }
       } else {
         if (newParentUrl.href === window.location.href) return
-        // debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, newParentUrl.search)
+        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, newParentUrl.search)
         if (action === 'push') {
           history.pushState(null, '', newParentUrl.href)
         } else {
@@ -411,7 +415,7 @@ export default {
         if (this.scrolling !== 'no') console.error('iframeResizer=true is only compatible with scrolling=no.')
         // always try to apply iframe resizer, it it is not loaded inside the iframe it will do nothing
         window.iFrameResize({
-          // log: debugIframeResizer.enabled,
+          log: isIFrameResizerDebugActive,
           scrolling: 'no',
           onResized: () => { this.resized = true }
         }, `#${this.id}`)
