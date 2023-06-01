@@ -341,7 +341,7 @@ export default {
         this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
-        if (this.contentWindowRegistered) {
+        if (this.contentWindowRegistered && this.syncState) {
           debugVIframe('replace location after change using postMessage', this.fullSrc)
           this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
         } else {
