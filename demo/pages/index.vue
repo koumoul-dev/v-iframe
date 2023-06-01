@@ -8,7 +8,7 @@ const syncedStateNested = ref({})
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" sm="6" lg="4" xl="3">
+      <!--<v-col cols="12" sm="6" lg="4" xl="3">
           iframe with default aspect ratio
           <v-iframe src="./content-auto-resize.html" class="elevation-3" />
         </v-col>
@@ -41,7 +41,8 @@ const syncedStateNested = ref({})
           iframe with scrollTo instructions
           <v-iframe ref="iframeScroll" src="./content-scroll.html" class="elevation-3" style="height: 1500px" />
         </v-col>
-      <!--
+      -->
+      
       <v-col cols="12" sm="8" lg="8" xl="4">
         <p>iframe with nav synchronization</p>
         <p>sync state: {{ syncedState }}</p>
@@ -53,9 +54,10 @@ const syncedStateNested = ref({})
         <v-btn :disabled="$route.query.param1 !== 'parent'" @click="$router.push({path: $route.path, query: {}})">
           Remove query param from parent
         </v-btn>
-        <v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
+        <!--<v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />-->
+          <v-iframe ref="iframeState" src="./embed" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
       </v-col>
-      <v-col cols="12" sm="8" lg="8" xl="4">
+      <!--<v-col cols="12" sm="8" lg="8" xl="4">
           <p>iframe with nested nav synchronization</p>
           <p>sync state: {{ syncedStateNested }}</p>
           <v-iframe ref="iframeStateNested" src="./nested.html" :sync-state="true" class="elevation-3" @state="e => syncedStateNested = e" />
