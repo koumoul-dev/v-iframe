@@ -33,10 +33,10 @@
 <script>
 
 // import goTo from 'vuetify/lib/services/goto/index.mjs'
-import debug from 'debug'
-const debugVIframe = debug('v-iframe')
+/*import Debug from 'debug'
+const debugVIframe = Debug('v-iframe')
 debugVIframe.log = console.log.bind(console)
-const debugIframeResizer = debug('iframe-resizer')
+const debugIframeResizer = Debug('iframe-resizer')*/
 const rand = () => Math.random().toString(36).substr(2, 5)
 
 const ssr = typeof window === 'undefined'
@@ -108,6 +108,10 @@ export default {
       }
     },
     syncState: {
+      type: Boolean,
+      default: false
+    },
+    syncStateIgnorePath: {
       type: Boolean,
       default: false
     },
@@ -193,7 +197,7 @@ export default {
           })
         }
         for (const key of Object.keys(query).filter(key => query[key] !== undefined && query[key] !== null)) {
-          if (key === 'p') {
+          if (key === 'p' && !this.syncStateIgnorePath) {
             let prefix = fullSrcUrl.pathname
             if (!prefix.endsWith('/')) prefix += '/'
             fullSrcUrl.pathname = query.p
@@ -223,7 +227,7 @@ export default {
     }
   },
   mounted() {
-    debugVIframe('mount', this.src)
+    // debugVIframe('mount', this.src)
     // wait for context to be rendered and hopefully have definitive width (dialogs, etc)
     if (this.delay !== null) {
       setTimeout(() => this.resize(), this.delay)
@@ -255,7 +259,7 @@ export default {
         // nothing to do
       } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
-        debugVIframe('received action message from iframe', e.data)
+        // debugVIframe('received action message from iframe', e.data)
         
         if (e.data.scroll === 'top') {
           if (this.$vuetify.goTo) {
@@ -292,7 +296,7 @@ export default {
           this.contentWindowRegistered = true
         }
       } else {
-        debugVIframe('transmit message', e.data)
+        // debugVIframe('transmit message', e.data)
         this.$emit('message', e.data)
       }
     }
@@ -307,7 +311,7 @@ export default {
     // simple temporary replacement of vuetify goTo
     // TODO: make vuetify service work in this context
     goTo(offset) {
-      debugVIframe('use internal goTo method instead of vuetify')
+      // debugVIframe('use internal goTo method instead of vuetify')
       try {
         this.$el.scrollIntoView({behavior: 'smooth'})
       } catch(err) {
@@ -320,28 +324,28 @@ export default {
         return
       }
       if (this.syncedSrc === this.fullSrc) return
-      debugVIframe(`apply state from parent to iframe
+      /*debugVIframe(`apply state from parent to iframe
   - parent query: ${window.location.search}
   - new full src: ${this.fullSrc}
-  - current synced src: ${this.syncedSrc}`)
+  - current synced src: ${this.syncedSrc}`)*/
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
         this.emitState()
       }
       if (!this.appliedSrc || !this.iframeWindow) {
-        debugVIframe('set initial appliedSrc', this.fullSrc)
+        // debugVIframe('set initial appliedSrc', this.fullSrc)
         this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
         if (this.contentWindowRegistered) {
-          debugVIframe('replace location after change using postMessage', this.fullSrc)
+          // debugVIframe('replace location after change using postMessage', this.fullSrc)
           this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
         } else {
-          debugVIframe('replace location after change using iframe.location.replace', this.fullSrc)
+          // debugVIframe('replace location after change using iframe.location.replace', this.fullSrc)
           try {
             this.iframeWindow.location.replace(this.fullSrc)
           } catch (err) {
-            debugVIframe('failure to replace location', err)
+            // debugVIframe('failure to replace location', err)
             this.appliedSrc = this.fullSrc
           }
         }
@@ -362,7 +366,7 @@ export default {
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
         newParentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
       }
-      if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
+      if (originalSrcUrl.pathname !== syncedSrcUrl.pathname && !this.syncStateIgnorePath) {
         let prefix = originalSrcUrl.pathname
         if (!prefix.endsWith('/')) prefix += '/'
         let p = syncedSrcUrl.pathname
@@ -380,10 +384,10 @@ export default {
           }
         }
         if (JSON.stringify(query) === JSON.stringify(this.$route.query)) return
-        debugVIframe(`apply state from iframe to parent using vue router
+        /*debugVIframe(`apply state from iframe to parent using vue router
   - synced src: ${this.syncedSrc}
   - current query: ${JSON.stringify(this.$route.query)}
-  - new query: ${JSON.stringify(query)}`)
+  - new query: ${JSON.stringify(query)}`)*/
         if (action === 'push') {
           this.$router.push({ query })
         } else {
@@ -391,7 +395,7 @@ export default {
         }
       } else {
         if (newParentUrl.href === window.location.href) return
-        debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, newParentUrl.search)
+        // debugVIframe('apply state from iframe to parent using window.history', this.syncedSrc, newParentUrl.search)
         if (action === 'push') {
           history.pushState(null, '', newParentUrl.href)
         } else {
@@ -407,7 +411,7 @@ export default {
         if (this.scrolling !== 'no') console.error('iframeResizer=true is only compatible with scrolling=no.')
         // always try to apply iframe resizer, it it is not loaded inside the iframe it will do nothing
         window.iFrameResize({
-          log: debugIframeResizer.enabled,
+          // log: debugIframeResizer.enabled,
           scrolling: 'no',
           onResized: () => { this.resized = true }
         }, `#${this.id}`)
@@ -418,14 +422,14 @@ export default {
     },
     resize() {
       const newWidth = this.$el.getBoundingClientRect().width
-      debugVIframe(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
+      // debugVIframe(`should we apply new width ? current=${this.actualWidth}, new=${newWidth}`)
 
       if (this.actualWidth === newWidth) return
       if (!newWidth) return
       if (this.actualWidth !== null && this.redrawOnResize) {
         // another nextTick to force a redraw of the iframe
         // it might create a flicking effect, but the iframe content might not manage resizing correctly
-        debugVIframe('force iframe redraw after resize', this.actualWidth, newWidth)
+        // debugVIframe('force iframe redraw after resize', this.actualWidth, newWidth)
         this.iframeWindow = null
         this.actualWidth = null
         this.$nextTick(() => this.applyNewWidth(newWidth))
@@ -435,7 +439,7 @@ export default {
     },
     applyNewWidth(newWidth, recurse = true) {
       this.actualWidth = newWidth
-      debugVIframe(`applied new width, width=${this.actualWidth}, aspectRatio=${this.actualAspectRatio}`)
+      // debugVIframe(`applied new width, width=${this.actualWidth}, aspectRatio=${this.actualAspectRatio}`)
       // another nextTick to wait for iframe to be rendered now that actualWidth was defined
       this.$nextTick(() => {
         const iframeElement = this.$el.getElementsByTagName('iframe')[0]
@@ -446,7 +450,7 @@ export default {
         this.iframeWindow = iframeElement.contentWindow
         setTimeout(() => {
           const rect = iframeElement.getBoundingClientRect()
-          debugVIframe('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
+          // debugVIframe('check aspect ratio', newWidth, this.actualAspectRatio, rect.width / rect.height)
         }, 300)
       })
     },
