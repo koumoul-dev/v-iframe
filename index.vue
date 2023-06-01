@@ -328,10 +328,10 @@ export default {
         return
       }
       if (this.syncedSrc === this.fullSrc) return
-      /*debugVIframe(`apply state from parent to iframe
+      debugVIframe(`apply state from parent to iframe
   - parent query: ${window.location.search}
   - new full src: ${this.fullSrc}
-  - current synced src: ${this.syncedSrc}`)*/
+  - current synced src: ${this.syncedSrc}`)
       if (this.syncState) {
         this.syncedSrc = this.fullSrc
         this.emitState()
