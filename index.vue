@@ -40,7 +40,7 @@ const isDebugActive = (key) => {
   return !ssr && window.localStorage && window.localStorage.debug && window.localStorage.debug.indexOf(key) !== -1
 }
 const isVIFrameDebugActive = isDebugActive('v-iframe')
-const debugVIframe = () => {
+function debugVIframe() {
   if (isVIFrameDebugActive) console.log.apply(console, arguments)
 }
 const isIFrameResizerDebugActive = isDebugActive('iframe-resizer')
