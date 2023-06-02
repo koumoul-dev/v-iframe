@@ -27,10 +27,11 @@
     return ret
   }
   _window.addEventListener('message', function onMessage(e) {
+    var vIframeOptions = _window.vIframeOptions || {}
     if (e.source === _window.parent && typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
       if (e.data.href && e.data.stateAction) {
         log('v-iframe/content-window received instruction to navigate', e.data.href)
-        var router = _window.vIframeOptions && _window.vIframeOptions.router
+        var router = vIframeOptions.router
         // nuxt 2 way of reading router
         if (!router) router = _window.$nuxt && _window.$nuxt.$router
         // nuxt 3 way of reading router
@@ -41,8 +42,11 @@
             log('failed to access router un nuxt 3 mode', err)
           }
         }
-        if (router) {
-          var url = new URL(e.data.href)
+
+        var url = new URL(e.data.href)
+        var dynamicRouting = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+
+        if (router && dynamicRouting) {
           var query = {}
           url.searchParams.forEach((value, key) => {
             query[key] = value

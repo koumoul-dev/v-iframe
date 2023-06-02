@@ -3,5 +3,5 @@ import '../public/content-window.js'
 </script>
 
 <template>
-  Hello
+  {{  $route.fullPath  }}
 </template>

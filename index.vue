@@ -341,7 +341,7 @@ export default {
         this.appliedSrc = this.fullSrc
       } else {
         // replacing location instead of changing src prevents interacting with the browser history
-        if (this.contentWindowRegistered && this.syncState) {
+        if (this.contentWindowRegistered) {
           debugVIframe('replace location after change using postMessage', this.fullSrc)
           this.sendMessage({ viframe: true, stateAction: 'replace', href: this.fullSrc })
         } else {
@@ -388,10 +388,10 @@ export default {
           }
         }
         if (JSON.stringify(query) === JSON.stringify(this.$route.query)) return
-        /*debugVIframe(`apply state from iframe to parent using vue router
+        debugVIframe(`apply state from iframe to parent using vue router
   - synced src: ${this.syncedSrc}
   - current query: ${JSON.stringify(this.$route.query)}
-  - new query: ${JSON.stringify(query)}`)*/
+  - new query: ${JSON.stringify(query)}`)
         if (action === 'push') {
           this.$router.push({ query })
         } else {
