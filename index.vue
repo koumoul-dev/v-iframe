@@ -110,6 +110,10 @@ export default {
       type: Boolean,
       default: false
     },
+    syncStateIgnorePath: {
+      type: Boolean,
+      default: false
+    },
     queryParamsExclude: {
       type: Array,
       default: null
@@ -192,7 +196,7 @@ export default {
           })
         }
         for (const key of Object.keys(query).filter(key => query[key] !== undefined && query[key] !== null)) {
-          if (key === 'p') {
+          if (key === 'p' && !this.syncStateIgnorePath) {
             let prefix = fullSrcUrl.pathname
             if (!prefix.endsWith('/')) prefix += '/'
             fullSrcUrl.pathname = query.p
@@ -338,7 +342,7 @@ export default {
         if (this.queryParamsExclude && this.queryParamsExclude.includes(key)) continue
         newParentUrl.searchParams.set(key, syncedSrcUrl.searchParams.get(key))
       }
-      if (originalSrcUrl.pathname !== syncedSrcUrl.pathname) {
+      if (originalSrcUrl.pathname !== syncedSrcUrl.pathname && !this.syncStateIgnorePath) {
         let prefix = originalSrcUrl.pathname
         if (!prefix.endsWith('/')) prefix += '/'
         let p = syncedSrcUrl.pathname
