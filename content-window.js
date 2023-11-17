@@ -66,8 +66,6 @@
           existingKeys.forEach(key => {
             delete vIframeOptions.reactiveParams[key]
           })
-          
-          _window.history.replaceState(null, '', e.data.href)
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')
           _window.location.href = e.data.href
