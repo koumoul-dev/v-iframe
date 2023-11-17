@@ -57,7 +57,7 @@
           router.replace(routerParams)
         } if (vIframeOptions.reactiveParams) {
           log('v-iframe/content-window navigate using history.replaceState')
-          _window.history(null, '', e.data.href)
+          _window.history.replaceState(null, '', e.data.href)
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')
           _window.location.href = e.data.href
