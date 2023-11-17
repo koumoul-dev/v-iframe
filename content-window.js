@@ -44,9 +44,10 @@
         }
 
         var url = new URL(e.data.href)
-        var dynamicRouting = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+        var useRouter = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+        var useReactiveParams = _window.location.origin === url.origin && _window.location.pathname === url.pathname && typeof vIframeOptions.reactiveParams === 'object'
 
-        if (router && dynamicRouting) {
+        if (router && useRouter) {
           var query = {}
           url.searchParams.forEach((value, key) => {
             query[key] = value
@@ -55,8 +56,17 @@
           const routerParams = { path: path, query: query }
           log('v-iframe/content-window navigate using vue router', JSON.stringify(routerParams))
           router.replace(routerParams)
-        } if (vIframeOptions.reactiveParams) {
-          log('v-iframe/content-window navigate using history.replaceState')
+        } else if (useReactiveParams) {
+          log('v-iframe/content-window navigate using reactive search params probably provided by useUrlSearchParams')
+          var existingKeys = Object.keys(vIframeOptions.reactiveParams)
+          url.searchParams.forEach((value, key) => {
+            vIframeOptions.reactiveParams[key] = value
+            existingKeys.splice(existingKeys.indexOf(key), 1)
+          })
+          existingKeys.forEach(key => {
+            delete vIframeOptions.reactiveParams[key]
+          })
+          
           _window.history.replaceState(null, '', e.data.href)
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')
