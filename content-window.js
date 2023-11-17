@@ -33,7 +33,7 @@
         log('v-iframe/content-window received instruction to navigate', e.data.href)
         var router = vIframeOptions.router
         // nuxt 2 way of reading router
-        if (!router) router = _window.$nuxt && (_window.$nuxt.$router || _window.$nuxt._router)
+        if (!router) router = _window.$nuxt && _window.$nuxt.$router
         // nuxt 3 way of reading router
         if (!router) {
           try {
@@ -44,9 +44,10 @@
         }
 
         var url = new URL(e.data.href)
-        var dynamicRouting = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+        var useRouter = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+        var useReactiveParams = _window.location.origin === url.origin && _window.location.pathname === url.pathname && typeof vIframeOptions.reactiveParams === 'object'
 
-        if (router && dynamicRouting) {
+        if (router && useRouter) {
           var query = {}
           url.searchParams.forEach((value, key) => {
             query[key] = value
@@ -55,6 +56,16 @@
           const routerParams = { path: path, query: query }
           log('v-iframe/content-window navigate using vue router', JSON.stringify(routerParams))
           router.replace(routerParams)
+        } else if (useReactiveParams) {
+          log('v-iframe/content-window navigate using reactive search params probably provided by useUrlSearchParams')
+          var existingKeys = Object.keys(vIframeOptions.reactiveParams)
+          url.searchParams.forEach((value, key) => {
+            vIframeOptions.reactiveParams[key] = value
+            existingKeys.splice(existingKeys.indexOf(key), 1)
+          })
+          existingKeys.forEach(key => {
+            delete vIframeOptions.reactiveParams[key]
+          })
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')
           _window.location.href = e.data.href
