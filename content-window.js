@@ -55,8 +55,9 @@
           const routerParams = { path: path, query: query }
           log('v-iframe/content-window navigate using vue router', JSON.stringify(routerParams))
           router.replace(routerParams)
-        } if (reactiveParams) {
-          oldReplaceState.call(_window.history, null, '', e.data.href)
+        } if (vIframeOptions.reactiveParams) {
+          log('v-iframe/content-window navigate using history.replaceState')
+          _window.history(null, '', e.data.href)
         } else {
           log('v-iframe/content-window navigate by overwriting location.href')
           _window.location.href = e.data.href
