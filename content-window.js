@@ -33,7 +33,7 @@
         log('v-iframe/content-window received instruction to navigate', e.data.href)
         var router = vIframeOptions.router
         // nuxt 2 way of reading router
-        if (!router) router = _window.$nuxt && _window.$nuxt.$router
+        if (!router) router = _window.$nuxt && (_window.$nuxt.$router || _window.$nuxt._router)
         // nuxt 3 way of reading router
         if (!router) {
           try {
