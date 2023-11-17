@@ -223,7 +223,13 @@ export default {
       this.$nextTick(() => {
         this.setSrc()
       })
-    }
+    },
+    queryParamsExtra: {
+      handler() {
+        this.setSrc()
+      },
+      deep: true
+    },
   },
   mounted() {
     debugVIframe('mount', this.src)
