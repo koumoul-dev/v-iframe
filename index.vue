@@ -130,6 +130,10 @@ export default {
     queryParamsExtra: {
       type: Object,
       default: () => ({})
+    },
+    reactiveParams: {
+      type: Object,
+      default: null
     }
   },
   data: () => ({
@@ -184,6 +188,8 @@ export default {
         let query
         if (this.$route) {
           query = { ...this.$route.query }
+        } if (this.reactiveParams) {
+          query = { ...this.reactiveParams }
         } else {
           const searchParams = new URL(window.location.href).searchParams
           for (const key of [...searchParams.keys()]) {
@@ -396,6 +402,16 @@ export default {
           this.$router.push({ query })
         } else {
           this.$router.replace({ query })
+        }
+      } else if (this.reactiveParams && action !== 'push') {
+        debugVIframe('apply state from iframe to parent using reactive params', this.syncedSrc, newParentUrl.search)
+        for (const key of [...newParentUrl.searchParams.keys()]) {
+          this.reactiveParams[key] = newParentUrl.searchParams.get(key)
+        }
+        for (const key of Object.keys(this.reactiveParams)) {
+          if (!newParentUrl.searchParams.has(key)) {
+            delete this.reactiveParams[key]
+          }
         }
       } else {
         if (newParentUrl.href === window.location.href) return
