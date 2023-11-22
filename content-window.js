@@ -3,10 +3,10 @@
     return
   }
   function log () {
-    if (!_window.localStorage || !window.localStorage.debug || window.localStorage.debug.indexOf('v-iframe') === -1) {
-      return
+    var debug = _window.localStorage && (window.localStorage.debug || window.localStorage.DEBUG)
+    if (debug && debug.indexOf('v-iframe') !== -1) {
+      console.log.apply(console, arguments)
     }
-    console.log.apply(console, arguments)
   }
 
   log('v-iframe/content-window register with parent window')

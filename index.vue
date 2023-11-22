@@ -228,16 +228,11 @@ export default {
     }
   },
   watch: {
-    src: {
+    fullSrc: {
       handler() {
         this.setSrc()
       },
       immediate: true
-    },
-    '$route.query'() {
-      this.$nextTick(() => {
-        this.setSrc()
-      })
     }
   },
   mounted() {
