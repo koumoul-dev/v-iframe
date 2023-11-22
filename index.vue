@@ -110,6 +110,10 @@ export default {
       type: Boolean,
       default: false
     },
+    syncStateDirection: {
+      type: String,
+      default: 'both' // or 'up' or 'down
+    },
     syncStateIgnorePath: {
       type: Boolean,
       default: false
@@ -175,7 +179,7 @@ export default {
           fullSrcUrl.searchParams.set(key, this.queryParamsExtra[key])
         })
       }
-      if (this.syncState) {
+      if (this.syncState && ['both', 'down'].includes(this.syncStateDirection)) {
         let query
         if (this.$route) {
           query = { ...this.$route.query }
@@ -279,7 +283,7 @@ export default {
           newSyncedSrcUrl.searchParams.sort()
           this.syncedSrc = newSyncedSrcUrl.href
           this.emitState()
-          if (this.syncState) {
+          if (this.syncState && ['both', 'up'].includes(this.syncStateDirection)) {
             this.storeState(e.data.stateAction)
           }
         }
@@ -310,10 +314,8 @@ export default {
   - parent query: ${window.location.search}
   - new full src: ${this.fullSrc}
   - current synced src: ${this.syncedSrc}`)
-      if (this.syncState) {
-        this.syncedSrc = this.fullSrc
-        this.emitState()
-      }
+      this.syncedSrc = this.fullSrc
+      this.emitState()
       if (!this.appliedSrc || !this.iframeWindow) {
         debugVIframe('set initial appliedSrc', this.fullSrc)
         this.appliedSrc = this.fullSrc
