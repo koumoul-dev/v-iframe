@@ -53,9 +53,9 @@
             query[key] = value
           })
           var base = router.options.base
-          if (!base && router.history) base = router.history.base
+          if (!base && router.options.history) base = router.options.history.base
           if (!base) {
-            log('failed to access base path in router (no router.options.base nor router.history.base)')
+            log('failed to access base path in router (no router.options.base nor router.options.history.base)')
           }
           var path = url.pathname.replace(base, '/').replace('//', '/')
           const routerParams = { path: path, query: query }
