@@ -52,7 +52,12 @@
           url.searchParams.forEach((value, key) => {
             query[key] = value
           })
-          var path = url.pathname.replace(router.options.base, '/').replace('//', '/')
+          var base = router.options.base
+          if (!base && router.history) base = router.history.base
+          if (!base) {
+            log('failed to access base path in router (no router.options.base nor router.history.base)')
+          }
+          var path = url.pathname.replace(base, '/').replace('//', '/')
           const routerParams = { path: path, query: query }
           log('v-iframe/content-window navigate using vue router', JSON.stringify(routerParams))
           router.replace(routerParams)
