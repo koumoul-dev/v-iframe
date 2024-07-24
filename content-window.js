@@ -44,10 +44,10 @@
         }
 
         var url = new URL(e.data.href)
-        var useRouter = _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || vIframeOptions.reactiveParams)
+        var useRouter = !!router && _window.location.origin === url.origin && (_window.location.pathname !== url.pathname || !vIframeOptions.reactiveParams)
         var useReactiveParams = _window.location.origin === url.origin && _window.location.pathname === url.pathname && typeof vIframeOptions.reactiveParams === 'object'
 
-        if (router && useRouter) {
+        if (useRouter) {
           var query = {}
           url.searchParams.forEach((value, key) => {
             query[key] = value

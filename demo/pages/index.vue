@@ -4,6 +4,7 @@ import 'iframe-resizer/js/iframeResizer'
 
 const syncedState = ref({})
 const syncedStateNested = ref({})
+const extraParams = ref({})
 </script>
 <template>
   <v-container>
@@ -43,7 +44,7 @@ const syncedStateNested = ref({})
         </v-col>
       -->
       
-      <v-col cols="12" sm="8" lg="8" xl="4">
+      <!--<v-col cols="12" sm="8" lg="8" xl="4">
         <p>iframe with nav synchronization</p>
         <p>sync state: {{ syncedState }}</p>
         <p>param1: {{ $route.query.param1 }}</p>
@@ -54,8 +55,19 @@ const syncedStateNested = ref({})
         <v-btn :disabled="$route.query.param1 !== 'parent'" @click="$router.push({path: $route.path, query: {}})">
           Remove query param from parent
         </v-btn>
-        <!--<v-iframe ref="iframeState" src="./content-state.html" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />-->
           <v-iframe ref="iframeState" src="./embed" :sync-state="true" :query-params-extra="{extraParam: 1}" :query-params-exclude="['param2']" class="elevation-3" @state="e => syncedState = e" />
+      </v-col>-->
+      <v-col cols="12" sm="8" lg="8" xl="4">
+        <p>iframe with nav extra query params from parent and local query params in iframe</p>
+        <p>sync state: {{ syncedState }}</p>
+        <p>param1: {{ extraParams.param1 }}</p>
+        <v-btn :disabled="extraParams.param1 === 'parent'" @click="extraParams.param1 = 'parent'">
+          Push query param from parent
+        </v-btn>
+        <v-btn :disabled="extraParams.param1 !== 'parent'" @click="delete extraParams.param1">
+          Remove query param from parent
+        </v-btn>
+        <v-iframe ref="iframeState" src="./embed" :query-params-extra="extraParams" @state="e => syncedState = e" />
       </v-col>
       <!--<v-col cols="12" sm="8" lg="8" xl="4">
           <p>iframe with nested nav synchronization</p>

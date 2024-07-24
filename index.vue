@@ -182,13 +182,22 @@ export default {
     },
     fullSrc() {
       if (ssr) return this.src
-      const fullSrcUrl = new URL(this.src, window.location.href)
+      const syncStateDown = this.syncState && ['both', 'down'].includes(this.syncStateDirection)
+      const fullSrcUrl = new URL(syncStateDown ? this.src : (this.syncedSrc ?? this.src), window.location.href)
+      // in none sync state mode we preserve iframe local params, except those that came from queryParamsExtra
+      if (!syncStateDown) {
+        for (const key of this._queryParamsExtraKeys ?? []) {
+          fullSrcUrl.searchParams.delete(key)
+        }
+      }
       if (this.queryParamsExtra) {
         Object.keys(this.queryParamsExtra).forEach(key => {
+          this._queryParamsExtraKeys = this._queryParamsExtraKeys ?? []
+          if (!this._queryParamsExtraKeys.includes(key)) this._queryParamsExtraKeys.push(key)
           fullSrcUrl.searchParams.set(key, this.queryParamsExtra[key])
         })
       }
-      if (this.syncState && ['both', 'down'].includes(this.syncStateDirection)) {
+      if (syncStateDown) {
         let query
         if (this.$route) {
           query = { ...this.$route.query }
