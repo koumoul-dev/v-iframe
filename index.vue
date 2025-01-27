@@ -165,7 +165,6 @@ export default {
         id: this.id,
         src: this.appliedSrc,
         scrolling: this.scrolling,
-        frameborder: 0,
         loading: this.lazy ? 'lazy' : 'eager',
         ...this.iframeAttrs
       }
@@ -278,7 +277,7 @@ export default {
       } else if (typeof e.data === 'object' && (e.data.viframe || e.data.vIframe || e.data['v-iframe'])) {
         // messages to be interpreted by viframe itself contain object with viframe=true
         debugVIframe('received action message from iframe', e.data)
-        
+
         if (e.data.scroll === 'top') {
           if (this.$vuetify.goTo) {
             this.$vuetify.goTo('#' + this.id, this.goToOptions)
@@ -331,8 +330,8 @@ export default {
     goTo(offset) {
       debugVIframe('use internal goTo method instead of vuetify')
       try {
-        this.$el.scrollIntoView({behavior: 'smooth'})
-      } catch(err) {
+        this.$el.scrollIntoView({ behavior: 'smooth' })
+      } catch (err) {
         console.error(err)
       }
     },
