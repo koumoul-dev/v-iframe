@@ -156,7 +156,6 @@ export default {
         id: this.id,
         src: this.appliedSrc,
         scrolling: this.scrolling,
-        frameborder: 0,
         loading: this.lazy ? 'lazy' : 'eager',
         ...this.iframeAttrs
       }
